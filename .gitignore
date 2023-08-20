@@ -70,3 +70,22 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+
+# Too large files typically
+*.scenetemplate
+
+# Audio
+*.mp3
+*.m4a
+*.wav
+*.ogg
+
+# Video
+*.mp4
+*.mov
+*.avi
+
+# Image
+*.png
+*.jpg
+*.jpeg
