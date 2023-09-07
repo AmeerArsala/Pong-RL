@@ -5,4 +5,5 @@ Prefabs/
 Scenes/
 Sprites/
 
-!.meta
+!*.meta
+!*.mat
