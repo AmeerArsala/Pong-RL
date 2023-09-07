@@ -89,3 +89,7 @@ crashlytics-build.properties
 *.png
 *.jpg
 *.jpeg
+
+# Fonts
+*.ttf
+*.otf
