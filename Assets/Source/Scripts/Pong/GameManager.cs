@@ -1,14 +1,21 @@
+namespace Pong;
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using Pong.Player;
+
 public class GameManager : MonoBehaviour
 {
-    //public int number = 0;
-
-    // Start is called before the first frame update
+    private Player player1;
+    private Player player2;
+    
     void Start()
     {
+        Debug.Log("Hello World!");
+
+        // Initialize Players/Pong Paddles
         
     }
 
