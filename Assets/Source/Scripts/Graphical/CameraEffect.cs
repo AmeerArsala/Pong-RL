@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Graphics {
+namespace Graphical {
     [ExecuteInEditMode]
     [RequireComponent(typeof(Camera))]
     public class CameraEffect : MonoBehaviour

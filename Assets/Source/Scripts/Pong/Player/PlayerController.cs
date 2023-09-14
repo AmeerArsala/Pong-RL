@@ -1,11 +1,15 @@
-namespace Pong.Player;
+//namespace Pong.Player;
+using Pong.Player;
 
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerController : MonoBehaviour
+public partial class PlayerController : MonoBehaviour
 {
+    // per second
+    public const float SPEED_VIEWPORT_PERCENTAGE = 1.00f;  // travel 100% vertical screen size in one second
+
     private bool isInitialized = false;
     public PlayerControls controls;
 
@@ -22,10 +26,10 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        control();
+        respondToInput();
     }
 
-    private void control() {
+    protected void respondToInput() {
         if (!isInitialized) {
             return;
         }
@@ -39,5 +43,3 @@ public class PlayerController : MonoBehaviour
         }
     }
 }
-
-public record PlayerControls(KeyCode Up, KeyCode Down);

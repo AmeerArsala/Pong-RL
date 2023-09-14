@@ -1,4 +1,5 @@
-namespace Pong;
+//namespace Pong;
+using Pong;
 
 using System.Collections;
 using System.Collections.Generic;
@@ -6,16 +7,17 @@ using UnityEngine;
 
 using Pong.Player;
 
-public class GameManager : MonoBehaviour
+public partial class GameManager : MonoBehaviour
 {
-    private Player player1;
-    private Player player2;
+    private Player player1, player2;
+    public GameObject playerPrefab; // reference in the Unity Editor; will be a sprite prefab
     
     void Start()
     {
         Debug.Log("Hello World!");
 
         // Initialize Players/Pong Paddles
+        GameObject rightPaddle = Instantiate(playerPrefab, transform.position, Quaternion.identity);
         
     }
 
