@@ -26,14 +26,24 @@ public partial class Player {
         controller.InitializeControls(controls);
     }
 
-    public Player(string name, GameObject body, PlayerControls controls) : this(new PlayerData(name), body, controls) {}
-
-    public static Player CreateNew(string name, GameObject prefab, Vector2 viewportPos, PlayerControls controls) {
+    private static GameObject InstantiatePaddle(GameObject prefab, Vector2 viewportPos) {
         // calculate actual position
-        Vector2 pos = viewportPos * GameCache.BG_TRANSFORM.position;
+        Vector3 bgScale = GameCache.BG_TRANSFORM.localScale;
+        Vector2 pos2f = viewportPos * new Vector2(bgScale.x, bgScale.y);
+        Vector3 pos = new Vector3(pos2f.x, pos2f.y, 0f);
 
         // create paddle
         GameObject paddle = GameObject.Instantiate(prefab, pos, Quaternion.identity);
+
+        //Debug.Log("Viewport Position (Center Origin): " + viewportPos);
+        //Debug.Log("Final Position: " + pos);
+
+        return paddle;
+    }
+
+    public static Player CreateNew(string name, GameObject prefab, Vector2 viewportPos, PlayerControls controls) {
+        // create paddle
+        GameObject paddle = InstantiatePaddle(prefab, viewportPos);
 
         // default value
         string playerName = name;
@@ -43,7 +53,11 @@ public partial class Player {
             playerName = DateTime.Now.ToString("MM/dd/yyyy H:mm");
         }
 
-        return new Player(playerName, paddle, controls);
+        // initialize and set name
+        PlayerData playerData = ScriptableObject.CreateInstance<PlayerData>();
+        playerData.Initialize(playerName);
+
+        return new Player(playerData, paddle, controls);
     }
 
     //TODO:
@@ -62,5 +76,20 @@ public partial class Player {
 
     public void OnScore() {
         // ? update Agent?
+    }
+
+    public void SetLocalPaddleDimensions(float vpThickness, float vpLength) {
+        Vector3 bgScale = GameCache.BG_TRANSFORM.localScale;
+
+        sprite.transform.localScale = new Vector3(
+            vpThickness * bgScale.x,
+            vpLength * bgScale.y,
+            sprite.transform.localScale.z
+        );
+    }
+
+    // @param Vector2 vpDimensions - viewport dimensions Vector2f[thickness, length]
+    public void SetLocalPaddleDimensions(Vector2 vpDimensions) {
+        SetLocalPaddleDimensions(vpDimensions.x, vpDimensions.y);
     }
 }

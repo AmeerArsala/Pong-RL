@@ -24,6 +24,9 @@ public partial class GameManager : MonoBehaviour
         // Cache Desired Global Variables
         GameCache.BG_TRANSFORM = backgroundSprite.transform;
 
+        //Debug.Log(GameConstants.RIGHT_PADDLE_START_POSITION);
+        //Debug.Log(GameConstants.LEFT_PADDLE_START_POSITION);
+
         // Initialize Players/Pong Paddles
         player1 = Player.CreateNew(player1Name, playerPrefab, GameConstants.RIGHT_PADDLE_START_POSITION, GameConstants.RIGHT_PADDLE_CONTROLS);
         player2 = Player.CreateNew(player2Name, playerPrefab, GameConstants.LEFT_PADDLE_START_POSITION, GameConstants.LEFT_PADDLE_CONTROLS);

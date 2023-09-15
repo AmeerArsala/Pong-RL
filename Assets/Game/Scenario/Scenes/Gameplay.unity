@@ -529,7 +529,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   player1Name: 
   player2Name: 
-  playerPrefab: {fileID: 0}
+  playerPrefab: {fileID: 4734173293490353123, guid: b3755f7a25136714394bb6aed1d95364, type: 3}
   backgroundSprite: {fileID: 615220968}
 --- !u!1 &615220968
 GameObject:

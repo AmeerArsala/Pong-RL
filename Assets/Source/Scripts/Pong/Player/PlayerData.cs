@@ -19,23 +19,15 @@ public partial class PlayerData : ScriptableObject {
     public const string NO_NAME = "";
     private const bool TRACK_HISTORY_DEFAULT = false;
     
-    [SerializeField] private readonly string playerName;
-    [SerializeField] private bool trackHistory;
+    [SerializeField] private string playerName;
+    [SerializeField] private bool trackHistory = TRACK_HISTORY_DEFAULT;
     [SerializeField] private readonly List<DataUnit> history = new List<DataUnit>();
 
     //TODO: fields of action-reward history (if boolean allows), agent/model id: string, etc.
     // ? Maybe use burst compilation for tracking history?
 
-
-    // create a new history; default configuration
-    public PlayerData(string playerName) {
-        this.playerName = playerName; 
-        trackHistory = TRACK_HISTORY_DEFAULT;
-    }
-
-    public PlayerData(string playerName, bool trackHistory) {
+    public void Initialize(string playerName) {
         this.playerName = playerName;
-        this.trackHistory = trackHistory;
     }
 
     public string GetPlayerName() {
