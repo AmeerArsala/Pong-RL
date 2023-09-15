@@ -13,8 +13,9 @@ public partial class PlayerController : MonoBehaviour
     private bool isInitialized = false;
     public PlayerControls controls;
 
-    public void Initialize(PlayerControls controls) {
+    public void InitializeControls(PlayerControls controls) {
         this.controls = controls;
+        isInitialized = true;
     }
 
     // Start is called before the first frame update

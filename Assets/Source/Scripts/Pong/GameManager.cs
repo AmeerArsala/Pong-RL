@@ -10,21 +10,33 @@ using Pong.Player;
 public partial class GameManager : MonoBehaviour
 {
     private Player player1, player2;
-    public GameObject playerPrefab; // reference in the Unity Editor; will be a sprite prefab
+
+    // public => reference in the Unity Editor
+    public string player1Name = PlayerData.NO_NAME, player2Name = PlayerData.NO_NAME;
+    public GameObject playerPrefab; // will be a sprite prefab
+    public GameObject backgroundSprite; // reference a GameObject in the Scene
     
     void Start()
     {
+        // Hello World
         Debug.Log("Hello World!");
 
+        // Cache Desired Global Variables
+        GameCache.BG_TRANSFORM = backgroundSprite.transform;
+
         // Initialize Players/Pong Paddles
-        GameObject rightPaddle = Instantiate(playerPrefab, transform.position, Quaternion.identity);
+        player1 = Player.CreateNew(player1Name, playerPrefab, GameConstants.RIGHT_PADDLE_START_POSITION, GameConstants.RIGHT_PADDLE_CONTROLS);
+        player2 = Player.CreateNew(player2Name, playerPrefab, GameConstants.LEFT_PADDLE_START_POSITION, GameConstants.LEFT_PADDLE_CONTROLS);
         
     }
 
     // Update is called once per frame
     void Update()
     {
-        //i++;
-        //Debug.Log("Hello World! x" + i);
+        //TODO: put stuff here
+    }
+
+    public string GetCurrentScore() {
+        return player1.GetScore() + "-" + player2.GetScore();
     }
 }

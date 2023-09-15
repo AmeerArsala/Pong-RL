@@ -16,6 +16,7 @@ using RL;
      ??? Potential add-on: Y-acceleration and further derivatives of Y. Not x tho, that would be very stupid and not even make physical sense
 */
 public partial class PlayerData : ScriptableObject {
+    public const string NO_NAME = "";
     private const bool TRACK_HISTORY_DEFAULT = false;
     
     [SerializeField] private readonly string playerName;

@@ -4,6 +4,8 @@ using Pong.Player;
 using System;
 using UnityEngine;
 
+using Pong;
+
 /**
  ** PlayerController controller
  ** PlayerData playerData 
@@ -21,15 +23,31 @@ public partial class Player {
 
         // add + initialize controller
         PlayerController controller = sprite.AddComponent<PlayerController>();
-        controller.Initialize(controls);
-    }
-
-    // constructors will create new data, unless loaded from an old save
-    public Player(GameObject body, PlayerControls controls) : this(DateTime.Now.ToString("MM/dd/yyyy H:mm"), body, controls) {
-      // no name specified, so current date + time as name
+        controller.InitializeControls(controls);
     }
 
     public Player(string name, GameObject body, PlayerControls controls) : this(new PlayerData(name), body, controls) {}
+
+    public static Player CreateNew(string name, GameObject prefab, Vector2 viewportPos, PlayerControls controls) {
+        // calculate actual position
+        Vector2 pos = viewportPos * GameCache.BG_TRANSFORM.position;
+
+        // create paddle
+        GameObject paddle = GameObject.Instantiate(prefab, pos, Quaternion.identity);
+
+        // default value
+        string playerName = name;
+
+        // decide name if not named
+        if (playerName.Equals(PlayerData.NO_NAME)) { // empty => no name => current date time name
+            playerName = DateTime.Now.ToString("MM/dd/yyyy H:mm");
+        }
+
+        return new Player(playerName, paddle, controls);
+    }
+
+    //TODO:
+    //public static Player LoadExisting(string )
 
     public int GetScore() { return score; }
     public PlayerData GetPlayerData() { return playerData; }
