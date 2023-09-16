@@ -5,7 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-using RL;
+using Pong.RL;
 
 /*  For Pong RL, we will only care about the statistics of:
      *   Y position of Paddle

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace RL {
+namespace Pong.RL {
     public static class Constants {
         // Observation Constants: Observation Indices (not all of the possible ones, but the ones that include pairs)
         public const int PLAYER_POS_Y = 0, OPPONENT_POS_Y = 1;

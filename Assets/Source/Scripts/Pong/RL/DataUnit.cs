@@ -1,10 +1,10 @@
-//namespace RL;
-using RL;
+//namespace Pong.RL;
+using Pong.RL;
 
 using System.Collections;
 using System.Collections.Generic;
 
-using static RL.Constants;
+//using static Pong.RL.Constants;
 
 //TODO: use something like GSON here; purely for data storage and not necessarily an object we want to really keep track of.
 public partial class DataUnit {
@@ -20,8 +20,8 @@ public partial class DataUnit {
 
     public DataUnit(float[] observation) {
         this.observation = observation;
-        action = ACTION_NULL;
-        reward = REWARD_NULL;
+        action = Constants.ACTION_NULL;
+        reward = Constants.REWARD_NULL;
     }
 
     public float[] GetObservation() { 

@@ -17,6 +17,7 @@ public partial class Player {
     public readonly GameObject sprite;
     
     private int score = 0;
+    private Player opponent;
 
     // load from data
     public Player(PlayerData playerData, GameObject sprite, PlayerControls controls) {
@@ -68,16 +69,25 @@ public partial class Player {
     public int GetScore() { return score; }
     public PlayerData GetPlayerData() { return playerData; }
 
+    public Player Opponent {
+        get { return opponent; }
+        set { opponent = value; }
+    }
+
     public void ScorePoint() {
         score++;
 
-        // TODO: Update UI element
+        // TODO: Update corresponding UI element
 
         OnScore();
     }
 
     public void OnScore() {
         // ? update Agent?
+    }
+
+    public void Update() {
+        //TODO
     }
 
     public void SetLocalPaddleDimensions(float vpThickness, float vpLength) {
