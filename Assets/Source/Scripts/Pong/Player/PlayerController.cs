@@ -5,8 +5,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using static Pong.GameCache;
+
 public partial class PlayerController : MonoBehaviour
 {
+    //TODO: incorporate RigidBody2D + ball physics
     // per second
     public const float SPEED_VIEWPORT_PERCENTAGE = 1.00f;  // travel 100% vertical screen size in one second
 
@@ -27,20 +30,47 @@ public partial class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        respondToInput();
+        RespondToInput();
     }
 
-    protected void respondToInput() {
+    protected void RespondToInput() {
         if (!isInitialized) {
             return;
         }
 
+        float dy = 0f;
+
         if (Input.GetKey(controls.Up)) {
-            //TODO: move up
+            dy += DeltaY();
         }
 
         if (Input.GetKey(controls.Down)) {
-            //TODO: move down
+            dy += -DeltaY();
         }
+
+        // now that all the movement updates have been collected, time to apply them
+        MoveY(dy);
+    }
+
+    protected float DeltaY() {
+        float dy_dt = SPEED_VIEWPORT_PERCENTAGE * BG_TRANSFORM.localScale.y;
+        
+        return dy_dt * Time.deltaTime;
+    }
+
+    public void MoveY(float deltaY) {
+        // origin is in the center
+        float MAX_Y_DISTANCE = BG_TRANSFORM.localScale.y / 2f;
+        float halfPaddleLength = transform.localScale.y / 2f;
+        
+        float topEdgeY = transform.localPosition.y + halfPaddleLength;
+        float bottomEdgeY = transform.localPosition.y - halfPaddleLength;
+
+        if (topEdgeY + deltaY > MAX_Y_DISTANCE || bottomEdgeY + deltaY < -MAX_Y_DISTANCE) { // not allowed to move out of bounds
+            return;
+        }
+
+        // moving will not take it out of bounds
+        transform.localPosition += new Vector3(0f, deltaY, 0f);
     }
 }

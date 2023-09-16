@@ -8,6 +8,8 @@ using Pong.Player;
 
 namespace Pong {
     public static class GameConstants {
+        public const int MAX_SCORE = 999; // any more than that and the UI kinda clips
+
         // constants for if origin of a viewport is in the middle of the screen
         public const float CENTER_ORIGIN_X = 0.5f;
         public const float CENTER_ORIGIN_Y = 0.5f;
