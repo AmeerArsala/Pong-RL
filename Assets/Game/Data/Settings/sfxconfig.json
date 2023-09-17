@@ -1,0 +1,8 @@
+{
+    "paddleHit": "pong_paddle_hit.ogg",
+    "wallHit": "pong_wall_hit.ogg",
+    "scoreSound": "pong_score_beep.ogg",
+    "gameResult": "omg.ogg",
+    "hoverOption": "pong_paddle_hit.ogg",
+    "selectOption": "pong_score_beep.ogg" 
+}

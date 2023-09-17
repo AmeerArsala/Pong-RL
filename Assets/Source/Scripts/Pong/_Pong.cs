@@ -34,7 +34,14 @@ namespace Pong {
 
     public static class GameCache {
         public static Transform BG_TRANSFORM;
+        public static int WIN_SCORE;
+        public static float PLAYER_SPEED_VP; // in terms of viewport percentage Y
+        public static float BALL_SPEED_VP;   // in terms of viewport percentage X
+
+        public static bool MUTE_SOUNDS = false; // when turned on, audio won't be played
     }
 
     public partial class GameManager {}
+
+    //public partial class GameContext {}
 }

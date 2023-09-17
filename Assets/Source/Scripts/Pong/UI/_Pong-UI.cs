@@ -2,9 +2,8 @@
 
 using System.Collections;
 using System.Collections.Generic;
-using System;
+using UnityEngine;
 
-namespace State {
-    public partial class FSM {}
+namespace Pong.UI {
+    public partial class Scoreboard {}
 }
-

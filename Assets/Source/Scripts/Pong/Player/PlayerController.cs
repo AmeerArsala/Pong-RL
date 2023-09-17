@@ -10,8 +10,6 @@ using static Pong.GameCache;
 public partial class PlayerController : MonoBehaviour
 {
     //TODO: incorporate RigidBody2D + ball physics
-    // per second
-    public const float SPEED_VIEWPORT_PERCENTAGE = 1.00f;  // travel 100% vertical screen size in one second
 
     private bool isInitialized = false;
     public PlayerControls controls;
@@ -53,7 +51,7 @@ public partial class PlayerController : MonoBehaviour
     }
 
     protected float DeltaY() {
-        float dy_dt = SPEED_VIEWPORT_PERCENTAGE * BG_TRANSFORM.localScale.y;
+        float dy_dt = PLAYER_SPEED_VP * BG_TRANSFORM.localScale.y;
         
         return dy_dt * Time.deltaTime;
     }

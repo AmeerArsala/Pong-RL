@@ -7,6 +7,8 @@ using UnityEngine;
 
 using System;
 using Pong;
+using Pong.UI;
+using TMPro;
 
 /**
  ** PlayerController controller
@@ -16,13 +18,14 @@ public partial class Player {
     private PlayerData playerData;
     public readonly GameObject sprite;
     
-    private int score = 0;
+    private Scoreboard scoreboard;
     private Player opponent;
 
     // load from data
-    public Player(PlayerData playerData, GameObject sprite, PlayerControls controls) {
+    public Player(PlayerData playerData, GameObject sprite, PlayerControls controls, Scoreboard scoreboard) {
         this.playerData = playerData;
         this.sprite = sprite;
+        this.scoreboard = scoreboard;
 
         // add + initialize controller
         PlayerController controller = sprite.AddComponent<PlayerController>();
@@ -44,7 +47,7 @@ public partial class Player {
         return paddle;
     }
 
-    public static Player CreateNew(string name, GameObject prefab, Vector2 viewportPos, PlayerControls controls) {
+    public static Player CreateNew(string name, GameObject prefab, Vector2 viewportPos, PlayerControls controls, TMP_Text scoreText) {
         // create paddle
         GameObject paddle = InstantiatePaddle(prefab, viewportPos);
 
@@ -60,34 +63,24 @@ public partial class Player {
         PlayerData playerData = ScriptableObject.CreateInstance<PlayerData>();
         playerData.Initialize(playerName);
 
-        return new Player(playerData, paddle, controls);
+        return new Player(playerData, paddle, controls, new Scoreboard(scoreText));
     }
 
     //TODO:
     //public static Player LoadExisting(string )
 
-    public int GetScore() { return score; }
     public PlayerData GetPlayerData() { return playerData; }
+    public Scoreboard GetScoreboard() { return scoreboard; }
 
     public Player Opponent {
         get { return opponent; }
         set { opponent = value; }
     }
 
-    public void ScorePoint() {
-        score++;
-
-        // TODO: Update corresponding UI element
-
-        OnScore();
-    }
-
-    public void OnScore() {
-        // ? update Agent?
-    }
-
     public void Update() {
         //TODO
+
+        //TODO: playerData.feed(...);
     }
 
     public void SetLocalPaddleDimensions(float vpThickness, float vpLength) {
