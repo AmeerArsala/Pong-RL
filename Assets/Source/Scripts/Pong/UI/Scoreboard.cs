@@ -26,8 +26,6 @@ public partial class Scoreboard {
         scoreText.text = "" + score;
 
         //PlayScoreSound();
-
-        //OnScore();
     }
 
     private void PlayScoreSound() {
@@ -35,8 +33,4 @@ public partial class Scoreboard {
 
         audioSource.Play();
     }
-
-    /*public void OnScore() {
-        // ? update Agent?
-    }*/
 }

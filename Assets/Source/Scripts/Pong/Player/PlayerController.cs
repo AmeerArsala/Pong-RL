@@ -58,13 +58,13 @@ public partial class PlayerController : MonoBehaviour
 
     public void MoveY(float deltaY) {
         // origin is in the center
-        float MAX_Y_DISTANCE = BG_TRANSFORM.localScale.y / 2f;
+        float MAX_Y_POS = BG_TRANSFORM.localScale.y / 2f;
         float halfPaddleLength = transform.localScale.y / 2f;
         
         float topEdgeY = transform.localPosition.y + halfPaddleLength;
         float bottomEdgeY = transform.localPosition.y - halfPaddleLength;
 
-        if (topEdgeY + deltaY > MAX_Y_DISTANCE || bottomEdgeY + deltaY < -MAX_Y_DISTANCE) { // not allowed to move out of bounds
+        if (topEdgeY + deltaY > MAX_Y_POS || bottomEdgeY + deltaY < -MAX_Y_POS) { // not allowed to move out of bounds
             return;
         }
 

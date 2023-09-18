@@ -40,13 +40,13 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints:
-    - _LinkDecimalPrecision: 3
+    - _LinkDecimalPrecision: 4
     m_Floats:
     - _EnableExternalAlpha: 0
-    - _Length: 0.1
-    - _LineThickness: 0.02
+    - _Length: 0.05
+    - _LineThickness: 0.005
     - _PosX: 0.5
-    - _Spacing: 0.075
+    - _Spacing: 0.035
     m_Colors:
     - _BackgroundColor: {r: 0, g: 0, b: 0, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}

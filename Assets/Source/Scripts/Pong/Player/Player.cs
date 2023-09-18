@@ -10,6 +10,8 @@ using Pong;
 using Pong.UI;
 using TMPro;
 
+using static Pong.GameHelpers;
+
 /**
  ** PlayerController controller
  ** PlayerData playerData 
@@ -34,15 +36,13 @@ public partial class Player {
 
     private static GameObject InstantiatePaddle(GameObject prefab, Vector2 viewportPos) {
         // calculate actual position
-        Vector3 bgScale = GameCache.BG_TRANSFORM.localScale;
+        Vector3 pos = ToLocal(viewportPos);
+        /*Vector3 bgScale = GameCache.BG_TRANSFORM.localScale;
         Vector2 pos2f = viewportPos * new Vector2(bgScale.x, bgScale.y);
-        Vector3 pos = new Vector3(pos2f.x, pos2f.y, 0f);
+        Vector3 pos = new Vector3(pos2f.x, pos2f.y, 0f);*/
 
         // create paddle
         GameObject paddle = GameObject.Instantiate(prefab, pos, Quaternion.identity);
-
-        //Debug.Log("Viewport Position (Center Origin): " + viewportPos);
-        //Debug.Log("Final Position: " + pos);
 
         return paddle;
     }
@@ -81,6 +81,15 @@ public partial class Player {
         //TODO
 
         //TODO: playerData.feed(...);
+    }
+
+    public void ScorePoint() {
+        // Game: score point
+        scoreboard.ScorePoint();
+
+        // onScore
+        //TODO ...
+        //? update RL agent?
     }
 
     public void SetLocalPaddleDimensions(float vpThickness, float vpLength) {
