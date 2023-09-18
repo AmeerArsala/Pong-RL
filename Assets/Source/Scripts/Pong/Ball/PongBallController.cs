@@ -22,6 +22,8 @@ public partial class PongBallController : MonoBehaviour
     private float elapsedTrajectoryTime = 0.0f;
     private bool hasTrajectory = false;
 
+    private int ballStatus = BallStatus.NO_GOAL;
+
     // collision detection helper
     private readonly BodyPoints body = new BodyPoints();
 
@@ -32,6 +34,16 @@ public partial class PongBallController : MonoBehaviour
         public float topEdgeY, bottomEdgeY;
 
         public BodyPoints() {}
+
+        public void Update(Transform transform) {
+            // origin is in the center
+            halfBallLength = transform.localScale.y / 2f;
+
+            leftEdgeX = transform.localPosition.x - halfBallLength;
+            rightEdgeX = transform.localPosition.x + halfBallLength;
+            topEdgeY = transform.localPosition.y + halfBallLength;
+            bottomEdgeY = transform.localPosition.y - halfBallLength;
+        }
     }
 
     void Awake()
@@ -49,16 +61,7 @@ public partial class PongBallController : MonoBehaviour
     void Update()
     {
         // Update body points
-        // origin is in the center
-        body.halfBallLength = transform.localScale.y / 2f;
-
-        body.leftEdgeX = transform.localPosition.x - body.halfBallLength;
-        body.rightEdgeX = transform.localPosition.x + body.halfBallLength;
-        body.topEdgeY = transform.localPosition.y + body.halfBallLength;
-        body.bottomEdgeY = transform.localPosition.y - body.halfBallLength;
-
-        //TODO: collision handling
-        ListenForWallCollisions();
+        body.Update(transform);
 
         if (hasTrajectory) {
             // calculate current velocity
@@ -91,48 +94,51 @@ public partial class PongBallController : MonoBehaviour
         (float MIN_X_POS, float MIN_Y_POS) = (-MAX_X_POS, -MAX_Y_POS);
 
         Vector3 actualLocalDelta = new Vector3(localDelta.x, localDelta.y, localDelta.z);
-        bool goalOnLeft = false, goalOnRight = false; //? maybe change to a state
         
         // left
         if (transform.localPosition.x + localDelta.x < MIN_X_POS) {
             actualLocalDelta.x = MIN_X_POS - transform.localPosition.x;
-            goalOnLeft = true; //TODO
+
+            //* Score Point
+            ballStatus = BallStatus.GOAL_LEFT;
+
+            // Integrate Changes
+            transform.localPosition += actualLocalDelta;
+            return;
         }
 
         // right
         if (transform.localPosition.x + localDelta.x > MAX_X_POS) {
             actualLocalDelta.x = MAX_X_POS - transform.localPosition.x;
-            goalOnRight = true; //TODO
+            
+            //* Score Point
+            ballStatus = BallStatus.GOAL_RIGHT;
+
+            // Integrate Changes
+            transform.localPosition += actualLocalDelta;
+            return;
         }
 
         // top
         if (transform.localPosition.y + localDelta.y > MAX_Y_POS) {
             actualLocalDelta.y = MAX_Y_POS - transform.localPosition.y;
-            //TODO: schedule collision with top
+
+            //* Collide with the top wall
+            actualLocalDelta.y *= -1; // reverse y trajectory
+            //TODO: play wall sound
         }
 
         // bottom
         if (transform.localPosition.y + localDelta.y < MIN_Y_POS) {
             actualLocalDelta.y = MIN_Y_POS - transform.localPosition.y;
-            //TODO: schedule collision with bottom
+            
+            //* Collide with the bottom wall
+            actualLocalDelta.y *= -1; // reverse y trajectory
+            //TODO: play wall sound
         }
         
-    }
-
-    private void ListenForWallCollisions() {
-        // origin is in the center
-        /*float MAX_Y_DISTANCE = BG_TRANSFORM.localScale.y / 2f;
-
-        //if ()
-
-        if (topEdgeY)
-
-        if (topEdgeY + deltaY > MAX_Y_DISTANCE || bottomEdgeY + deltaY < -MAX_Y_DISTANCE) { // not allowed to move out of bounds
-            return;
-        }
-
-        // moving will not take it out of bounds
-        transform.localPosition += new Vector3(0f, deltaY, 0f);*/
+        //* Integrate Changes
+        transform.localPosition += actualLocalDelta;
     }
 
     public void BeginTrajectory() {
@@ -148,6 +154,8 @@ public partial class PongBallController : MonoBehaviour
     }
 
     private void ZeroMotion() {
+        ballStatus = BallStatus.NO_GOAL;
+
         viewportVelocity.x = 0f;
         viewportVelocity.y = 0f;
 
@@ -174,4 +182,6 @@ public partial class PongBallController : MonoBehaviour
 
         return ballMotion;
     }
+
+    public int GetBallStatus() { return ballStatus; }
 }

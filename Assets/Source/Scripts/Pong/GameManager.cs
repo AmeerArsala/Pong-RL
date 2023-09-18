@@ -54,9 +54,9 @@ public partial class GameManager : MonoBehaviour
         player1.Opponent = player2;
         player2.Opponent = player1;
 
-        // TODO: Create ball, then make it go at a random direction (left or right)
+        //* Create ball, then make it go at a random direction (left or right)
         ball = PongBall.FromPrefab(ballPrefab);
-        ball.Reset();
+        ball.Initialize(RandomPlayer()); // pick a random player to serve the ball
         ball.Serve();
     }
 
@@ -73,5 +73,16 @@ public partial class GameManager : MonoBehaviour
 
     public string GetCurrentScore() {
         return player1.GetScoreboard().GetScore() + "-" + player2.GetScoreboard().GetScore();
+    }
+
+    // pick a random Player. Either player1 or player2
+    public Player RandomPlayer() {
+        bool isPlayer1 = UnityEngine.Random.Range(0, 2) == 0; // random boolean
+
+        if (isPlayer1) {
+            return player1;
+        } else {
+            return player2;
+        }
     }
 }
