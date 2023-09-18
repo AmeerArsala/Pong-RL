@@ -84,7 +84,7 @@ public partial class PongBall {
         Vector2 viewportVelocity = speed * direction;
         //Vector3 localVelocity = ToLocal(viewportVelocity);
 
-        controller.viewportVelocity = viewportVelocity; // set velocity
+        controller.ViewportVelocity = viewportVelocity; // set velocity
         controller.BeginTrajectory(); // start the timer for y'(t)
     }
 
@@ -93,6 +93,9 @@ public partial class PongBall {
         bool attackerScoredGoal = controller.GetBallStatus() == attackerDesire;
 
         if (attackerScoredGoal) {
+            // stop the ball from going off the screen
+            controller.HaltTrajectory();
+
             attacker.ScorePoint();
 
             Destroy();

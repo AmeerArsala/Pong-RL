@@ -9,7 +9,7 @@ using static Pong.GameCache;
 
 public partial class PlayerController : MonoBehaviour
 {
-    //TODO: incorporate RigidBody2D + ball physics
+    //? incorporate RigidBody2D + ball physics
 
     private bool isInitialized = false;
     public PlayerControls controls;
@@ -71,4 +71,6 @@ public partial class PlayerController : MonoBehaviour
         // moving will not take it out of bounds
         transform.localPosition += new Vector3(0f, deltaY, 0f);
     }
+
+    public bool IsInitialized() { return isInitialized; }
 }

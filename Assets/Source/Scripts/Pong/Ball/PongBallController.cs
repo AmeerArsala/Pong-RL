@@ -6,22 +6,26 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using Pong;
+using Pong.Physics;
 using static Pong.GameCache;
 using static Pong.GameHelpers;
 
 public partial class PongBallController : MonoBehaviour
 {
     // parameters of trajectory
-    public Vector2 viewportVelocity = new Vector2(0f, 0f); // base viewport velocity
-    private readonly float[] yAccelerationAndBeyond = new float[GameConstants.BALL_Y_MAX_DERIVATIVE - 1]; // in terms of viewport percentage y
+    private readonly Motion2D viewportMotion = new Motion2D(
+        new Vector2(0f, 0f), // base viewport velocity
+        GameConstants.BALL_Y_MAX_DERIVATIVE - 1 // float[] yAccelerationAndBeyond in terms of viewport percentage y
+    );
 
     // delta
-    private Vector2 totalViewportVelocity = new Vector2(0f, 0f);
+    private readonly Vector2 totalViewportVelocity = new Vector2(0f, 0f);
 
-    // trajectory
+    // trajectory facilitation
     private float elapsedTrajectoryTime = 0.0f;
     private bool hasTrajectory = false;
 
+    // goal detection state
     private int ballStatus = BallStatus.NO_GOAL;
 
     // collision detection helper
@@ -65,27 +69,14 @@ public partial class PongBallController : MonoBehaviour
 
         if (hasTrajectory) {
             // calculate current velocity
-            totalViewportVelocity = CalculateViewportVelocity(elapsedTrajectoryTime);
+            Vector2 currentViewportVelocity = viewportMotion.CalculateTotalVelocity(elapsedTrajectoryTime);
+            totalViewportVelocity.Set(currentViewportVelocity.x, currentViewportVelocity.y);
 
             // motion
             MoveLocal(ToLocal(totalViewportVelocity));
 
             elapsedTrajectoryTime += Time.deltaTime;
         }
-    }
-
-    public Vector2 CalculateViewportVelocity(float time) {
-        Vector2 vpVelocity = viewportVelocity;
-
-        for (int i = 0; i < yAccelerationAndBeyond.Length; ++i) {
-            float coefficient = yAccelerationAndBeyond[i];
-            float termIndex = i + 1; // yes, this is a float and is equal to the nth derivative - 1
-
-            // only y changes; x changing like that would be very stupid
-            vpVelocity.y += coefficient * (Mathf.Pow(time, termIndex) / termIndex);
-        }
-
-        return vpVelocity;
     }
 
     public void MoveLocal(Vector3 localDelta) {
@@ -154,34 +145,33 @@ public partial class PongBallController : MonoBehaviour
     }
 
     private void ZeroMotion() {
+        // reset ball status
         ballStatus = BallStatus.NO_GOAL;
 
-        viewportVelocity.x = 0f;
-        viewportVelocity.y = 0f;
-
-        totalViewportVelocity.x = 0f;
-        totalViewportVelocity.y = 0f;
-
-        // initialize with zeroes
-        for (int i = 0; i < yAccelerationAndBeyond.Length; ++i) {
-            yAccelerationAndBeyond[i] = 0;
-        }
+        // cancel motion
+        totalViewportVelocity.Set(0f, 0f); // current total velocity is nullified
+        viewportMotion.ZeroOut();          // no more velocity and further derivatives! all 0
     }
 
     // [(x, y), (x', y'), (x'', y''), ...]
     // in terms of viewport %
-    public Vector2[] RetrieveBallMotion() {
-        Vector2[] ballMotion = new Vector2[2 + yAccelerationAndBeyond.Length]; // position and velocity are included too!
+    public Vector2[] RetrieveBallTrajectory() {
+        Vector2 vpLocalPos = ToViewport(transform.localPosition);
 
-        ballMotion[0] = ToViewport(transform.localPosition);
-        ballMotion[1] = totalViewportVelocity;
-        for (int i = 0; i < yAccelerationAndBeyond.Length; ++i) {
-            int i_ballMotion = i + 2;
-            ballMotion[i_ballMotion] = new Vector2(0.0f, yAccelerationAndBeyond[i]); // there is no x acceleration and beyonod, that would be very stupid
-        }
-
-        return ballMotion;
+        return viewportMotion.RetrieveTrajectory(vpLocalPos);
     }
 
     public int GetBallStatus() { return ballStatus; }
+
+    public bool HasTrajectory() { return hasTrajectory; }
+    public float GetElapsedTrajectoryTime() { return elapsedTrajectoryTime; }
+
+    public Vector2 ViewportVelocity {
+        get { 
+            return viewportMotion.velocity; 
+        }
+        set {
+            viewportMotion.velocity.Set(value.x, value.y);
+        }
+    }
 }
