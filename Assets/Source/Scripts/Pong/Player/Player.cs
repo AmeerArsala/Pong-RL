@@ -18,9 +18,11 @@ using static Pong.GameHelpers;
 */
 public partial class Player {
     private PlayerData playerData;
+
     public readonly GameObject sprite;
-    
-    private Scoreboard scoreboard;
+    private readonly PlayerController controller;
+    private readonly Scoreboard scoreboard;
+
     private Player opponent;
 
     // load from data
@@ -30,26 +32,16 @@ public partial class Player {
         this.scoreboard = scoreboard;
 
         // add + initialize controller
-        PlayerController controller = sprite.AddComponent<PlayerController>();
+        controller = sprite.AddComponent<PlayerController>();
         controller.InitializeControls(controls);
-    }
 
-    private static GameObject InstantiatePaddle(GameObject prefab, Vector2 viewportPos) {
-        // calculate actual position
-        Vector3 pos = ToLocal(viewportPos);
-        /*Vector3 bgScale = GameCache.BG_TRANSFORM.localScale;
-        Vector2 pos2f = viewportPos * new Vector2(bgScale.x, bgScale.y);
-        Vector3 pos = new Vector3(pos2f.x, pos2f.y, 0f);*/
-
-        // create paddle
-        GameObject paddle = GameObject.Instantiate(prefab, pos, Quaternion.identity);
-
-        return paddle;
+        // collision detection
+        RectangularBodyFrame bodyFrame = sprite.AddComponent<RectangularBodyFrame>();
     }
 
     public static Player CreateNew(string name, GameObject prefab, Vector2 viewportPos, PlayerControls controls, TMP_Text scoreText) {
         // create paddle
-        GameObject paddle = InstantiatePaddle(prefab, viewportPos);
+        GameObject paddle = GameObject.Instantiate(prefab, ToLocal(viewportPos), Quaternion.identity);
 
         // default value
         string playerName = name;
@@ -91,6 +83,10 @@ public partial class Player {
         //TODO ...
         //? update RL agent?
     }
+
+    //TODO: collision detect?
+
+    public void SendBallData(Vector)
 
     public void SetLocalPaddleDimensions(float vpThickness, float vpLength) {
         Vector3 bgScale = GameCache.BG_TRANSFORM.localScale;

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using Pong;
+using Pong.Physics;
 using static Pong.GameHelpers;
 using static Pong.GameCache;
 
@@ -24,6 +25,9 @@ public partial class PongBall {
 
         // add + initialize controller
         controller = sprite.AddComponent<PongBallController>();
+
+        // collision detection
+        RectangularBodyFrame bodyFrame = sprite.AddComponent<RectangularBodyFrame>();
     }
 
     public static PongBall FromPrefab(GameObject prefab) {
@@ -75,14 +79,13 @@ public partial class PongBall {
         (float angle, int serverDesire) = serveAngles.Pop();
         float speed = BALL_SPEED_VP; // in terms of viewport x percentage
 
-        bool differentPlayerServing = attackerDesire != serverDesire;
-        if (differentPlayerServing) {
+        bool otherPlayerServingInstead = attackerDesire != serverDesire;
+        if (otherPlayerServingInstead) {
             SwapAttacker();
         }
 
         Vector2 direction = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)); // unit vector
         Vector2 viewportVelocity = speed * direction;
-        //Vector3 localVelocity = ToLocal(viewportVelocity);
 
         controller.ViewportVelocity = viewportVelocity; // set velocity
         controller.BeginTrajectory(); // start the timer for y'(t)
@@ -103,7 +106,14 @@ public partial class PongBall {
             Reset();
             //TODO: [small delay]
             Serve();
+        } else {
+            Player defender = attacker.Opponent; // heading towards defender
+            
+            // detect collision
+
         }
+
+        //TODO: feed to players?
     }
 
     public void Destroy() {

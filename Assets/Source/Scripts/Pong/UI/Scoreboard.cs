@@ -25,6 +25,7 @@ public partial class Scoreboard {
         // update corresponding text
         scoreText.text = "" + score;
 
+        //TODO: fix audio
         //PlayScoreSound();
     }
 

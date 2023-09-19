@@ -9,7 +9,7 @@ using Pong.RL;
 
 /*  For Pong RL, we will only care about the statistics of:
      *   Y position of Paddle
-     *   Ball's relative distance:  vec2[X distance away (absolute value) from goal, Y distance away from Paddle]
+     *   Ball's relative distance: vec2[X distance away (absolute value) from goal, Y distance away from Paddle]
      *   Ball's velocity: vec2[X speed towards goal (absolute value), Y]
      ?   Observed Y position of the other Paddle
      ??  Observed Y velocity of the other Paddle; maybe delegate the observation of this to another model?
@@ -25,6 +25,8 @@ public partial class PlayerData : ScriptableObject {
 
     //TODO: fields of action-reward history (if boolean allows), agent/model id: string, etc.
     // ? Maybe use burst compilation for tracking history?
+
+    private Vector2[] relativeBallMotion;
 
     public void Initialize(string playerName) {
         this.playerName = playerName;
@@ -43,10 +45,15 @@ public partial class PlayerData : ScriptableObject {
         return history;
     }
 
+    public Vector2[] RelativeBallMotion {
+        get { return relativeBallMotion; }
+        set { relativeBallMotion = value; }
+    }
+
     /**
     * @param Vector2 playerPos - (x, y)
     * @param Vector2 opponentPos - (x, y)
-    * @param Vector2[] ballMotion - [(x, y), (x', y'), (x'', y''), ...]; Note that x'' and beyond will be 0; x' is constant, so it doesn't really matter
+    * @param Vector2[] relativeBallMotion - [(x, y), (x', y'), (x'', y''), ...]; Note that x'' and beyond will be 0; x' is constant, so it doesn't really matter
     ** (x, y) in [0.0, 1.0]. for x: 0.0 being at the player goal and 1.0 being at the opponent goal
     ** x' is constant and uses the same scale. It can be either positive (heading away from Player) or negative (heading towards the player) 
     ** x'' and beyond = 0

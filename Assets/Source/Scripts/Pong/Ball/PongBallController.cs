@@ -13,13 +13,8 @@ using static Pong.GameHelpers;
 public partial class PongBallController : MonoBehaviour
 {
     // parameters of trajectory
-    private readonly Motion2D viewportMotion = new Motion2D(
-        new Vector2(0f, 0f), // base viewport velocity
-        GameConstants.BALL_Y_MAX_DERIVATIVE - 1 // float[] yAccelerationAndBeyond in terms of viewport percentage y
-    );
-
-    // delta
-    private readonly Vector2 totalViewportVelocity = new Vector2(0f, 0f);
+    // contains base viewport velocity (Vector2) and float[] yAccelerationAndBeyond in terms of viewport percentage y
+    private readonly Motion2D viewportMotion = new Motion2D();
 
     // trajectory facilitation
     private float elapsedTrajectoryTime = 0.0f;
@@ -29,26 +24,8 @@ public partial class PongBallController : MonoBehaviour
     private int ballStatus = BallStatus.NO_GOAL;
 
     // collision detection helper
-    private readonly BodyPoints body = new BodyPoints();
-
-    private class BodyPoints {
-        public float halfBallLength;
-
-        public float leftEdgeX, rightEdgeX;
-        public float topEdgeY, bottomEdgeY;
-
-        public BodyPoints() {}
-
-        public void Update(Transform transform) {
-            // origin is in the center
-            halfBallLength = transform.localScale.y / 2f;
-
-            leftEdgeX = transform.localPosition.x - halfBallLength;
-            rightEdgeX = transform.localPosition.x + halfBallLength;
-            topEdgeY = transform.localPosition.y + halfBallLength;
-            bottomEdgeY = transform.localPosition.y - halfBallLength;
-        }
-    }
+    private RectangularBodyFrame bodyFrame;
+    //private RectangularBodyFrame rebounderBodyFrame;
 
     void Awake()
     {
@@ -58,22 +35,18 @@ public partial class PongBallController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        bodyFrame = GetComponent<RectangularBodyFrame>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        // Update body points
-        body.Update(transform);
-
         if (hasTrajectory) {
             // calculate current velocity
-            Vector2 currentViewportVelocity = viewportMotion.CalculateTotalVelocity(elapsedTrajectoryTime);
-            totalViewportVelocity.Set(currentViewportVelocity.x, currentViewportVelocity.y);
+            Vector2 currentTotalViewportVelocity = viewportMotion.CalculateTotalVelocity(elapsedTrajectoryTime);
 
             // motion
-            MoveLocal(ToLocal(totalViewportVelocity));
+            MoveLocal(ToLocal(currentTotalViewportVelocity));
 
             elapsedTrajectoryTime += Time.deltaTime;
         }
@@ -86,9 +59,9 @@ public partial class PongBallController : MonoBehaviour
 
         Vector3 actualLocalDelta = new Vector3(localDelta.x, localDelta.y, localDelta.z);
         
-        // left
-        if (transform.localPosition.x + localDelta.x < MIN_X_POS) {
-            actualLocalDelta.x = MIN_X_POS - transform.localPosition.x;
+        //* Left Boundary
+        if (bodyFrame.leftEdgeX + localDelta.x <= MIN_X_POS) {
+            actualLocalDelta.x = MIN_X_POS - bodyFrame.leftEdgeX;
 
             //* Score Point
             ballStatus = BallStatus.GOAL_LEFT;
@@ -98,9 +71,9 @@ public partial class PongBallController : MonoBehaviour
             return;
         }
 
-        // right
-        if (transform.localPosition.x + localDelta.x > MAX_X_POS) {
-            actualLocalDelta.x = MAX_X_POS - transform.localPosition.x;
+        //* Right Boundary
+        if (bodyFrame.rightEdgeX + localDelta.x >= MAX_X_POS) {
+            actualLocalDelta.x = MAX_X_POS - bodyFrame.rightEdgeX;
             
             //* Score Point
             ballStatus = BallStatus.GOAL_RIGHT;
@@ -110,21 +83,21 @@ public partial class PongBallController : MonoBehaviour
             return;
         }
 
-        // top
-        if (transform.localPosition.y + localDelta.y > MAX_Y_POS) {
-            actualLocalDelta.y = MAX_Y_POS - transform.localPosition.y;
+        //* Top Wall
+        if (bodyFrame.topEdgeY + localDelta.y >= MAX_Y_POS) {
+            actualLocalDelta.y = MAX_Y_POS - bodyFrame.topEdgeY;
 
-            //* Collide with the top wall
-            actualLocalDelta.y *= -1; // reverse y trajectory
+            //* Collide with the top wall => reverse y trajectory
+            viewportMotion.velocity.y *= -1;
             //TODO: play wall sound
         }
 
-        // bottom
-        if (transform.localPosition.y + localDelta.y < MIN_Y_POS) {
-            actualLocalDelta.y = MIN_Y_POS - transform.localPosition.y;
+        //* Bottom Wall
+        if (bodyFrame.bottomEdgeY + localDelta.y <= MIN_Y_POS) {
+            actualLocalDelta.y = MIN_Y_POS - bodyFrame.bottomEdgeY;
             
-            //* Collide with the bottom wall
-            actualLocalDelta.y *= -1; // reverse y trajectory
+            //* Collide with the bottom wall => reverse y trajectory
+            viewportMotion.velocity.y *= -1;
             //TODO: play wall sound
         }
         
@@ -148,9 +121,8 @@ public partial class PongBallController : MonoBehaviour
         // reset ball status
         ballStatus = BallStatus.NO_GOAL;
 
-        // cancel motion
-        totalViewportVelocity.Set(0f, 0f); // current total velocity is nullified
-        viewportMotion.ZeroOut();          // no more velocity and further derivatives! all 0
+        // cancel motion: no more velocity and further derivatives! all 0
+        viewportMotion.ZeroOut();
     }
 
     // [(x, y), (x', y'), (x'', y''), ...]

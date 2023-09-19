@@ -5,24 +5,28 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using Pong;
+
 public partial class Motion2D {
     public readonly Vector2 velocity = new Vector2(0f, 0f);
-    public readonly float[] yAccelerationAndBeyond;
+    public readonly float[] yAccelerationAndBeyond = new float[GameConstants.BALL_Y_MAX_DERIVATIVE - 1];
 
-    public Motion2D(Vector2 velocity, uint numDerivativesAfterVelocity) {
-        this.velocity.Set(velocity.x, velocity.y);
-        yAccelerationAndBeyond = new float[numDerivativesAfterVelocity];
-
+    public Motion2D(Vector2 velocity2f) {
+        velocity.Set(velocity2f.x, velocity2f.y);
         ResetYAccelerationAndBeyond();
     }
 
-    public Motion2D(uint numDerivativesAfterVelocity) {
-        yAccelerationAndBeyond = new float[numDerivativesAfterVelocity];
+    public Motion2D() {
         ResetYAccelerationAndBeyond();
+    }
+
+    public float Y_Acceleration {
+        get { return yAccelerationAndBeyond[0]; }
+        set { yAccelerationAndBeyond[0] = value; }
     }
 
     private void ResetYAccelerationAndBeyond() {
-        // initialize with zeroes
+        // initialize with zeros
         for (int i = 0; i < yAccelerationAndBeyond.Length; ++i) {
             yAccelerationAndBeyond[i] = 0;
         }

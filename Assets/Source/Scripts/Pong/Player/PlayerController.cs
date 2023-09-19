@@ -6,10 +6,13 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using static Pong.GameCache;
+using static Pong.GameHelpers;
 
 public partial class PlayerController : MonoBehaviour
 {
-    //? incorporate RigidBody2D + ball physics
+    // parameters of trajectory; x velocity and beyond will ALWAYS be 0. For the sake of simplicity, any derivative beyond acceleration will be 0
+    // contains base viewport velocity (Vector2) and float[] yAccelerationAndBeyond in terms of viewport percentage y
+    private readonly Motion2D viewportMotion = new Motion2D(); // this tracks motion, rather than controlling it
 
     private bool isInitialized = false;
     public PlayerControls controls;
@@ -28,10 +31,23 @@ public partial class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        RespondToInput();
+        float deltaY = RespondToInput();
+
+        //* Track Motion
+        // calculate velocity at this frame
+        Vector3 deltaPos = new Vector3(0f, deltaY, 0f);
+        Vector2 viewportVelocity = ToViewport(deltaPos) / Time.deltaTime;
+
+        // calculate acceleration at this frame
+        float deltaYVelocity = viewportVelocity.y - viewportMotion.velocity.y;
+        float viewportYAcceleration = deltaYVelocity / Time.deltaTime;
+
+        // set the new velocity and acceleration
+        viewportMotion.velocity.Set(viewportVelocity.x, viewportVelocity.y);
+        viewportMotion.Y_Acceleration = viewportYAcceleration;
     }
 
-    protected void RespondToInput() {
+    protected float RespondToInput() {
         if (!isInitialized) {
             return;
         }
@@ -46,8 +62,11 @@ public partial class PlayerController : MonoBehaviour
             dy += -DeltaY();
         }
 
-        // now that all the movement updates have been collected, time to apply them
+        //* Now that all the movement updates have been collected, time to apply them
         MoveY(dy);
+
+        // return the change in y
+        return dy;
     }
 
     protected float DeltaY() {
