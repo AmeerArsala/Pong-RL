@@ -6,10 +6,13 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using System;
+using UnityUtils;
+
 using Pong;
 using Pong.GamePlayer.Force;
 using Pong.Physics;
 using Pong.UI;
+
 using TMPro;
 
 using static Pong.GameHelpers;
@@ -22,8 +25,7 @@ namespace Pong.GamePlayer {
     public partial class Player {
         private PlayerData playerData;
 
-        public readonly GameObject sprite;
-        private readonly PlayerController controller;
+        public readonly ControlledGameObject<PlayerController> playerSprite;
         private readonly Scoreboard scoreboard;
 
         private readonly ForceMap forceMap;
@@ -33,11 +35,10 @@ namespace Pong.GamePlayer {
         // load from data
         public Player(PlayerData playerData, GameObject sprite, PlayerControls controls, Scoreboard scoreboard) {
             this.playerData = playerData;
-            this.sprite = sprite;
             this.scoreboard = scoreboard;
 
             // add + initialize controller
-            controller = sprite.AddComponent<PlayerController>();
+            PlayerController controller = sprite.AddComponent<PlayerController>();
             controller.InitializeControls(controls);
 
             // collision detection
@@ -45,6 +46,9 @@ namespace Pong.GamePlayer {
 
             // collision forces
             forceMap = new ForceMap(sprite.transform);
+
+            // wrap it up
+            playerSprite = new ControlledGameObject<PlayerController>(sprite, controller);
         }
 
         public static Player CreateNew(string name, GameObject prefab, Vector2 viewportPos, PlayerControls controls, TMP_Text scoreText) {
@@ -79,8 +83,8 @@ namespace Pong.GamePlayer {
         }
 
         public void Update() {
-            forceMap.PaddleVelocity = ToLocal(controller.GetViewportMotionTracker().velocity).y;
-            forceMap.PaddleAcceleration = ToLocal(new Vector2(0f, controller.GetViewportMotionTracker().Y_Acceleration)).y;
+            forceMap.PaddleVelocity = ToLocal(playerSprite.controller.GetViewportMotionTracker().velocity).y;
+            forceMap.PaddleAcceleration = ToLocal(new Vector2(0f, playerSprite.controller.GetViewportMotionTracker().Y_Acceleration)).y;
 
             //TODO: playerData.feed(...);
         }
@@ -94,20 +98,17 @@ namespace Pong.GamePlayer {
             //? update RL agent?
         }
 
-        //TODO:
-        //public void SendBallData(Vector) {}
-
         public Rebounder AsRebounder() {
-            return new Rebounder(forceMap, sprite.GetComponent<RectangularBodyFrame>());
+            return new Rebounder(forceMap, playerSprite.gameObj.GetComponent<RectangularBodyFrame>());
         }
 
         public void SetLocalPaddleDimensionsFromVP(float vpXThickness, float vpYLength) {
             Vector3 bgScale = GameCache.BG_TRANSFORM.localScale;
 
-            sprite.transform.localScale = new Vector3(
+            playerSprite.transform.localScale = new Vector3(
                 vpXThickness * bgScale.x,
                 vpYLength * bgScale.y,
-                sprite.transform.localScale.z
+                playerSprite.transform.localScale.z
             );
         }
 

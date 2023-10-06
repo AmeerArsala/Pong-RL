@@ -6,6 +6,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using UnityUtils;
+
 using Pong;
 using Pong.GamePlayer;
 using Pong.Physics;
@@ -15,8 +17,7 @@ using static Pong.GameCache;
 namespace Pong.Ball {
     //* After scoring, it goes: DestroyBall() -> [tiny delay] -> Reset() -> [small delay] -> Serve()
     public partial class PongBall {
-        public readonly GameObject sprite; // it won't actually be destroyed; it will just vanish and look like it was destroyed
-        private readonly PongBallController controller;
+        public readonly ControlledGameObject<PongBallController> ballSprite; // it won't actually be destroyed; it will just vanish and look like it was destroyed
         private readonly Stack<(float, int)> serveAngles = new Stack<(float, int)>(); // float is in radians, and the int is the attackerDesire
 
         // Player on the offensive
@@ -27,7 +28,7 @@ namespace Pong.Ball {
         private readonly Action OnScore;
         private readonly Action OnRebound;
 
-        public PongBall(GameObject ballSprite) {
+        public PongBall(GameObject sprite) {
             OnScore = () => {
                 //* Attacker Scored Goal
 
@@ -38,30 +39,30 @@ namespace Pong.Ball {
                 //TODO: [tiny delay]
                 Reset();
                 //TODO: [small delay]
-                //SwapAttacker();
                 Serve();
             };
 
             OnRebound = () => {
                 //* Ball was Rebounded by the defender
-                controller.ResetBallStatus();
+                ballSprite.controller.ResetBallStatus();
                 SwapAttacker();
             };
 
-            sprite = ballSprite;
-
             // add + initialize controller
-            controller = sprite.AddComponent<PongBallController>();
+            PongBallController controller = sprite.AddComponent<PongBallController>();
             controller.Initialize(OnScore, OnRebound);
 
             // collision detection
             RectangularBodyFrame bodyFrame = sprite.AddComponent<RectangularBodyFrame>();
+
+            // wrap it up
+            ballSprite = new ControlledGameObject<PongBallController>(sprite, controller);
         }
 
         public static PongBall FromPrefab(GameObject prefab) {
-            GameObject ballSprite = GameManager.Instantiate(prefab, GetStartLocalPosition(), Quaternion.identity);
+            GameObject sprite = GameManager.Instantiate(prefab, GetStartLocalPosition(), Quaternion.identity);
 
-            PongBall pongBall = new PongBall(ballSprite);
+            PongBall pongBall = new PongBall(sprite);
             pongBall.SetLocalScaleFromVPY(GameConstants.BALL_SCALE_Y);
 
             return pongBall;
@@ -72,7 +73,7 @@ namespace Pong.Ball {
             Reset();
 
             // Handle which server this is
-            bool serverIsToLeft = server.sprite.transform.localPosition.x < GetStartLocalPosition().x;
+            bool serverIsToLeft = server.playerSprite.transform.localPosition.x < GetStartLocalPosition().x;
 
             // initialize status
             attackerDesire = serverIsToLeft ? BallStatus.GOAL_RIGHT : BallStatus.GOAL_LEFT; 
@@ -121,8 +122,8 @@ namespace Pong.Ball {
             Vector2 direction = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)); // unit vector
             Vector2 viewportVelocity = speed * direction;
 
-            controller.ViewportVelocity = viewportVelocity; // set velocity
-            controller.BeginTrajectory(); // start the timer for y'(t)
+            ballSprite.controller.ViewportVelocity = viewportVelocity; // set velocity
+            ballSprite.controller.BeginTrajectory(); // start the timer for y'(t)
         }
 
         public void Update() {
@@ -130,23 +131,23 @@ namespace Pong.Ball {
         }
 
         public void DestroyBall() {
-            sprite.SetActive(false);
-            controller.HaltTrajectory(); // stop the ball from going off the screen
+            ballSprite.gameObj.SetActive(false);
+            ballSprite.controller.HaltTrajectory(); // stop the ball from going off the screen
         }
 
         public void Reset() {
             // set position to start position
-            sprite.transform.localPosition = GetStartLocalPosition();
+            ballSprite.transform.localPosition = GetStartLocalPosition();
 
             // activate
-            sprite.SetActive(true);
+            ballSprite.gameObj.SetActive(true);
         }
 
         private void SetAttacker(Player atkr) {
             attacker = atkr;
 
             // Now that the attacker has been set, the ball will be headed towards the "rebounder", or in other words, the other player
-            controller.Rebounder = attacker.Opponent.AsRebounder();
+            ballSprite.controller.Rebounder = attacker.Opponent.AsRebounder();
         }
 
         private void SwapAttacker() {
@@ -157,10 +158,10 @@ namespace Pong.Ball {
         public void SetLocalScaleFromVPY(float viewportY) {
             Vector3 bgScale = BG_TRANSFORM.localScale;
 
-            sprite.transform.localScale = new Vector3(
+            ballSprite.transform.localScale = new Vector3(
                 viewportY * bgScale.y, // square
                 viewportY * bgScale.y, // square
-                sprite.transform.localScale.z
+                ballSprite.transform.localScale.z
             );
 
             //Debug.Log("LocalScale: " + sprite.transform.localScale);
