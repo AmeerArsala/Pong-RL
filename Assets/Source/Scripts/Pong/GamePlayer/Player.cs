@@ -23,13 +23,16 @@ namespace Pong.GamePlayer {
     ** PlayerData playerData 
     */
     public partial class Player {
+        // For RL and save/loading
         private PlayerData playerData;
 
+        // Tangible GameObjects
         public readonly ControlledGameObject<PlayerController> playerSprite;
         private readonly Scoreboard scoreboard;
 
+        // For physics
         private readonly ForceMap forceMap;
-
+    
         private Player opponent;
 
         // load from data

@@ -25,7 +25,6 @@ namespace Pong.Ball {
         private bool hasTrajectory = false;
 
         // goal detection
-        private int ballStatus = BallStatus.NO_GOAL;
         private Action OnScore, OnRebound;
 
         // collision detection helper
@@ -88,7 +87,6 @@ namespace Pong.Ball {
                 //Debug.Log("BALL: bodyFrame.leftEdgeX = " + bodyFrame.leftEdgeX + ", actualLocalDelta.x = " + actualLocalDelta.x);
 
                 //* Score Point
-                ballStatus = BallStatus.GOAL_LEFT;
                 OnScore();
 
                 // Integrate Changes
@@ -100,7 +98,6 @@ namespace Pong.Ball {
                 //Debug.Log("BALL: bodyFrame.rightEdgeX = " + bodyFrame.rightEdgeX + ", actualLocalDelta.x = " + actualLocalDelta.x);
                 
                 //* Score Point
-                ballStatus = BallStatus.GOAL_RIGHT;
                 OnScore();
 
                 // Integrate Changes
@@ -122,7 +119,6 @@ namespace Pong.Ball {
                 //TODO: play paddle hit sound
 
                 // Rebound
-                ballStatus = BallStatus.REBOUNDED;
                 OnRebound();
                 return;
             }
@@ -159,16 +155,14 @@ namespace Pong.Ball {
         }
 
         private void ZeroMotion() {
-            // reset ball status
-            ResetBallStatus();
+            // reset ball state
+            ResetBallState();
 
             // cancel motion: no more velocity and further derivatives! all 0
             viewportMotion.ZeroOut();
         }
 
-        public void ResetBallStatus() {
-            ballStatus = BallStatus.NO_GOAL;
-            
+        public void ResetBallState() {
             bodyFrame.ResetState();
         }
 

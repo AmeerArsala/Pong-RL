@@ -44,7 +44,7 @@ namespace Pong.Ball {
 
             OnRebound = () => {
                 //* Ball was Rebounded by the defender
-                ballSprite.controller.ResetBallStatus();
+                ballSprite.controller.ResetBallState();
                 SwapAttacker();
             };
 
