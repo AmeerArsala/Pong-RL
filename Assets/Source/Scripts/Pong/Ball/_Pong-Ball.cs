@@ -21,12 +21,19 @@ namespace Pong.Ball {
     public partial class PongBallController : MonoBehaviour {}
 
     public static class BallStatus {
-        public const int GOAL_LEFT = -1;
+        private const int GOAL = 1;
+
+        public const int GOAL_LEFT = -GOAL;
         public const int NO_GOAL = 0;
-        public const int GOAL_RIGHT = 1;
+        public const int GOAL_RIGHT = GOAL;
+        public const int REBOUNDED = 2;
 
         public static int INVERT(int ballStatus) {
             return ballStatus * -1;
+        }
+
+        public static bool IsGoal(int ballStatus) {
+            return Mathf.Abs(ballStatus) == GOAL;
         }
     }
 }

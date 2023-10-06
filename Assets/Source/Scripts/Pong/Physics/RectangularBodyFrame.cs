@@ -8,84 +8,113 @@ using UnityEngine;
 using Pong;
 using static Pong.GameHelpers;
 
-//* This class assumes that the center of mass is in the center of the GameObject
-public class RectangularBodyFrame : MonoBehaviour
-{
-    // the literal local dimensions, not viewport
-    public readonly Vector2 halfBodyDimensions = new Vector2(0f, 0f); // because origin is in the center of the screen in this game
-    
-    public float leftEdgeX, rightEdgeX;
-    public float topEdgeY, bottomEdgeY;
-
-    private int boundedState = BoundState.UNBOUNDED;
-
-    // Start is called before the first frame update
-    void Start()
+namespace Pong.Physics {
+    //* This class assumes that the center of mass is in the center of the GameObject
+    public partial class RectangularBodyFrame : MonoBehaviour
     {
-        halfBodyDimensions = ToVector2(transform.localScale) / 2f;
-    }
+        // the literal local dimensions, not viewport
+        public Vector2 halfBodyDimensions = new Vector2(0f, 0f); // because origin is in the center of the screen in this game
+        
+        public float leftEdgeX, rightEdgeX;
+        public float topEdgeY, bottomEdgeY;
 
-    // Update is called once per frame
-    void Update()
-    {
-        halfBodyDimensions = ToVector2(transform.localScale) / 2f;
+        private int collisionState = CollisionState.NONE;
 
-        // origin is in the center
-        leftEdgeX = transform.localPosition.x - halfBodyDimensions.x;
-        rightEdgeX = transform.localPosition.x + halfBodyDimensions.x;
-        topEdgeY = transform.localPosition.y + halfBodyDimensions.y;
-        bottomEdgeY = transform.localPosition.y - halfBodyDimensions.y;
-    }
-
-    private bool CollidesWithLargerFrame(RectangularBodyFrame other) {
-        // Horizontal Collisions
-        (float otherBottomEdgeY, float otherTopEdgeY) otherYBounds = (other.bottomEdgeY, other.topEdgeY);
-        if (BoundedBetween(topEdgeY, otherYBounds, BoundState.TOP_BOUNDED) || BoundedBetween(bottomEdgeY, otherYBounds, BoundState.BOTTOM_BOUNDED)) {
-            return leftEdgeX == other.rightEdgeX || rightEdgeX == other.leftEdgeX;
+        private Vector2 HalfBodyDimensions {
+            get { return halfBodyDimensions; }
+            set { halfBodyDimensions.Set(value.x, value.y); }
         }
 
-        // Vertical Collisions
-        (float otherLeftEdgeX, float otherRightEdgeX) otherXBounds = (other.leftEdgeX, other.rightEdgeX);
-        if (BoundedBetween(leftEdgeX, otherXBounds, BoundState.LEFT_BOUNDED) || BoundedBetween(rightEdgeX, otherXBounds, BoundState.RIGHT_BOUNDED)) {
-            return topEdgeY == other.bottomEdgeY || bottomEdgeY == other.topEdgeY;
+        // Start is called before the first frame update
+        void Start()
+        {
+            HalfBodyDimensions = ToVector2(transform.localScale) / 2f;
         }
 
-        boundedState = BoundState.UNBOUNDED;
-        return false;
-    }
+        // Update is called once per frame
+        void Update()
+        {
+            HalfBodyDimensions = ToVector2(transform.localScale) / 2f;
 
-    public bool CollidesWith(RectangularBodyFrame other) {
-        // we don't know which is larger
-        // this will short circuit too if the first is true
-        bool collidesWith = CollidesWithLargerFrame(other) || other.CollidesWithLargerFrame(this);
-        boundedState = collidesWith ? -other.boundedState : BoundState.UNBOUNDED;
-
-        return collidesWith;
-    }
-
-    //* ONLY call this once CollidesWith verifies that there IS a collision point
-    //* Therefore, this assumes that one exists
-    public Vector2 CollisionPoint(RectangularBodyFrame other) {
-        Vector2 collisionPoint = new Vector2(0f, 0f);
-
-        if (BoundState.CollisionIsHorizontal(boundedState)) {
-            // Horizontal Collisions
-            collisionPoint.x = leftEdgeX == other.rightEdgeX ? leftEdgeX : rightEdgeX;
-
-            // y = avg(min of the top, max of the bottom)
-            collisionPoint.y = (Mathf.Min(topEdgeY, other.topEdgeY) + Mathf.Max(bottomEdgeY, other.bottomEdgeY)) / 2f;
-        } else {
-            // Vertical Collisions
-            // x = avg(min of the rights, max of the lefts)
-            collisionPoint.x = (Mathf.Min(rightEdgeX, other.rightEdgeX) + Mathf.Max(leftEdgeX, other.leftEdgeX)) / 2f;
-            collisionPoint.y = topEdgeY == other.bottomEdgeY ? topEdgeY : bottomEdgeY;
+            // origin is in the center
+            leftEdgeX = transform.localPosition.x - halfBodyDimensions.x;
+            rightEdgeX = transform.localPosition.x + halfBodyDimensions.x;
+            topEdgeY = transform.localPosition.y + halfBodyDimensions.y;
+            bottomEdgeY = transform.localPosition.y - halfBodyDimensions.y;
         }
 
-        return collisionPoint;
-    }
+        //* This will only be correct if there IS a collision to begin with. Otherwise, it is just a guess that isn't CollisionState.NONE
+        public int MostLikelyCollisionState(RectangularBodyFrame other) {
+            // Horizontal Losses
+            float leftEdge = Mathf.Abs(leftEdgeX - other.rightEdgeX);
+            float rightEdge = Mathf.Abs(other.leftEdgeX - rightEdgeX);
 
-    private bool BoundedBetween(float value, (float start, float end) bounds, int boundState) {
-        boundedState = boundState;
-        return value >= start && value <= end;
+            // Vertical Losses
+            float topEdge = Mathf.Abs(other.bottomEdgeY - topEdgeY);
+            float bottomEdge = Mathf.Abs(bottomEdgeY - other.topEdgeY);
+
+            // Candidate Selection
+            float bestHorizontal = Mathf.Min(leftEdge, rightEdge);
+            float bestVertical = Mathf.Min(topEdge, bottomEdge);
+
+            if (bestHorizontal <= bestVertical) {
+                return CollisionState.HORIZONTAL;
+            } else { // bestVertical < bestHorizontal
+                return CollisionState.VERTICAL;
+            }
+        }
+
+        public bool CollidesWith(RectangularBodyFrame other) {
+            // Eliminate Horizontal Possibilities
+            if (rightEdgeX < other.leftEdgeX || leftEdgeX > other.rightEdgeX) {
+                SetCollisionStates(CollisionState.NONE, other);
+                return false;
+            }
+
+            // Eliminate Vertical Possibilities
+            if (bottomEdgeY > other.topEdgeY || topEdgeY < other.bottomEdgeY) {
+                SetCollisionStates(CollisionState.NONE, other);
+                return false;
+            }
+
+            // X and Y overlap
+            SetCollisionStates(MostLikelyCollisionState(other), other);
+            return true;
+        }
+
+        /*public bool CollidesWith(RectangularBodyFrame other) {
+            return HeadOnCollidesWith(other) || other.HeadOnCollidesWith(this);
+        }*/
+
+        //* ONLY call this once CollidesWith() verifies that there IS a collision point
+        //* Therefore, this assumes that one exists
+        public Vector2 CollisionPoint(RectangularBodyFrame other) {
+            Vector2 collisionPoint = new Vector2(0f, 0f);
+
+            switch (collisionState) {
+                case CollisionState.HORIZONTAL:
+                    collisionPoint.x = leftEdgeX <= other.rightEdgeX ? leftEdgeX : rightEdgeX;
+                    
+                    // y = avg(min of the top, max of the bottom)
+                    collisionPoint.y = (Mathf.Min(topEdgeY, other.topEdgeY) + Mathf.Max(bottomEdgeY, other.bottomEdgeY)) / 2f;
+                    break;
+                case CollisionState.VERTICAL:
+                    // x = avg(min of the rights, max of the lefts)
+                    collisionPoint.x = (Mathf.Min(rightEdgeX, other.rightEdgeX) + Mathf.Max(leftEdgeX, other.leftEdgeX)) / 2f;
+
+                    collisionPoint.y = topEdgeY >= other.bottomEdgeY ? topEdgeY : bottomEdgeY;
+                    break;
+                default:
+                    // no collision occurred
+                    break;
+            }
+
+            return collisionPoint;
+        }
+
+        private void SetCollisionStates(int state, RectangularBodyFrame other) {
+            collisionState = state;
+            other.collisionState = state;
+        }
     }
 }

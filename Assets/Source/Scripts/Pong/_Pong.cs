@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-using Pong.Player;
+using Pong.GamePlayer;
 
 namespace Pong {
     public static class GameConstants {
@@ -13,6 +13,9 @@ namespace Pong {
 
         public const uint MAX_SCORE = 999; // any more than that and the UI kinda clips
         public const uint DEFAULT_WIN_SCORE = 11; // 11 points is a win in the original Pong game!
+
+        // used for abnormal shots
+        public const float PADDLE_MASS = 1.00f;
 
         // viewport y
         public const float BALL_SCALE_Y = 0.05f;

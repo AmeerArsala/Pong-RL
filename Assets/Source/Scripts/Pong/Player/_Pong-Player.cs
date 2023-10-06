@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Pong.Player {
+namespace Pong.GamePlayer {
     public partial class Player {}
 
     public partial class PlayerData : ScriptableObject {}

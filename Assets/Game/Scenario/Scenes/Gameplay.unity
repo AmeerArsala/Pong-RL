@@ -234,7 +234,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 186109535}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: aa3cc6a45d75d9b4d91fb6f45a8a22b9, type: 3}
   m_Name: 
@@ -546,6 +546,8 @@ MonoBehaviour:
   player2Name: 
   playerSpeedVP: 1
   ballSpeedVP: 0.45
+  ballServeMaxAngle: 1.3463969
+  ballBounceMaxAngle: 1.3463969
   scoreToWin: 11
   playerPrefab: {fileID: 4734173293490353123, guid: b3755f7a25136714394bb6aed1d95364, type: 3}
   ballPrefab: {fileID: 8237576963646212329, guid: 6e9fdbc93594ce84c8e5bb17ad03b5d9, type: 3}
