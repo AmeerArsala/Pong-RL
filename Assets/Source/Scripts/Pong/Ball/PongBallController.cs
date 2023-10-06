@@ -190,7 +190,7 @@ namespace Pong.Ball {
         public float GetElapsedTrajectoryTime() { return elapsedTrajectoryTime; }
 
         public Vector2 ViewportVelocity {
-            get { 
+            get {
                 return viewportMotion.velocity; 
             }
             set {
