@@ -104,9 +104,9 @@ namespace Pong.Ball {
                 serveAngles.Push((angle, desire));
                 
                 //TODO: debug
-                if (i == 10) {
+                /*if (i == 10) {
                     break;
-                }
+                }*/
             }
             
             // the Player serving is the one on the offensive
