@@ -1,6 +1,7 @@
 //namespace Pong.Ball;
 using Pong.Ball;
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -22,11 +23,36 @@ namespace Pong.Ball {
         private Player attacker; // "lastTouchedBy"; the initial trajectory will also set this as the player opposite to where it is traveling
         private int attackerDesire = BallStatus.NO_GOAL;
 
+        // Listeners
+        private readonly Action OnScore;
+        private readonly Action OnRebound;
+
         public PongBall(GameObject ballSprite) {
+            OnScore = () => {
+                //* Attacker Scored Goal
+
+                DestroyBall();
+
+                attacker.ScorePoint();
+
+                //TODO: [tiny delay]
+                Reset();
+                //TODO: [small delay]
+                //SwapAttacker();
+                Serve();
+            };
+
+            OnRebound = () => {
+                //* Ball was Rebounded by the defender
+                controller.ResetBallStatus();
+                SwapAttacker();
+            };
+
             sprite = ballSprite;
 
             // add + initialize controller
             controller = sprite.AddComponent<PongBallController>();
+            controller.Initialize(OnScore, OnRebound);
 
             // collision detection
             RectangularBodyFrame bodyFrame = sprite.AddComponent<RectangularBodyFrame>();
@@ -59,7 +85,7 @@ namespace Pong.Ball {
             // initialize serveAngles
             uint maxRounds = (WIN_SCORE) + (WIN_SCORE - 1);
             for (uint i = 0; i < maxRounds; ++i) {
-                float angle = Random.Range(-BALL_SERVE_MAX_ANGLE, BALL_SERVE_MAX_ANGLE);
+                float angle = UnityEngine.Random.Range(-BALL_SERVE_MAX_ANGLE, BALL_SERVE_MAX_ANGLE);
                 int desire = BallStatus.GOAL_RIGHT; // assumes the server is on the left; doesn't matter if wrong bc it will get changed in the following if statement
 
                 // (i % 2 == 1) => first server is to the left => the right server is on odd rounds to serve left
@@ -69,7 +95,7 @@ namespace Pong.Ball {
                     desire = BallStatus.GOAL_LEFT;
                 }
 
-                Debug.Log(angle);
+                //Debug.Log(angle);
                 serveAngles.Push((angle, desire));
                 
                 //TODO: debug
@@ -100,40 +126,20 @@ namespace Pong.Ball {
         }
 
         public void Update() {
-            bool attackerScoredGoal = controller.GetBallStatus() != BallStatus.NO_GOAL && controller.GetBallStatus() == attackerDesire;
-            if (attackerScoredGoal) {
-                //* Attacker Scored Goal
-                //Debug.Log(controller.GetBallStatus());
-
-                DestroyBall();
-
-                attacker.ScorePoint();
-
-                //TODO: [tiny delay]
-                Reset();
-                //TODO: [small delay]
-                Serve();
-            } else if (controller.GetBallStatus() == BallStatus.REBOUNDED) {
-                //* Ball was Rebounded by the defender
-                controller.ResetBallStatus();
-                controller.SetFreeze(false); // unfreeze
-                SwapAttacker();
-            }
-
             //TODO: feed to players?
         }
 
         public void DestroyBall() {
-            controller.HaltTrajectory(); // stop the ball from going off the screen
             sprite.SetActive(false);
+            controller.HaltTrajectory(); // stop the ball from going off the screen
         }
 
         public void Reset() {
-            // activate
-            sprite.SetActive(true);
-
             // set position to start position
             sprite.transform.localPosition = GetStartLocalPosition();
+
+            // activate
+            sprite.SetActive(true);
         }
 
         private void SetAttacker(Player atkr) {

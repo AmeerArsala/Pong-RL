@@ -15,8 +15,8 @@ namespace Pong.Physics {
         // the literal local dimensions, not viewport
         public Vector2 halfBodyDimensions = new Vector2(0f, 0f); // because origin is in the center of the screen in this game
         
-        public float leftEdgeX, rightEdgeX;
-        public float topEdgeY, bottomEdgeY;
+        public float leftEdgeX = 0f, rightEdgeX = 0f;
+        public float topEdgeY = 0f, bottomEdgeY = 0f;
 
         private int collisionState = CollisionState.NONE;
 
@@ -41,6 +41,15 @@ namespace Pong.Physics {
             rightEdgeX = transform.localPosition.x + halfBodyDimensions.x;
             topEdgeY = transform.localPosition.y + halfBodyDimensions.y;
             bottomEdgeY = transform.localPosition.y - halfBodyDimensions.y;
+        }
+
+        public void ResetState() {
+            collisionState = CollisionState.NONE;
+
+            leftEdgeX = 0f;
+            rightEdgeX = 0f;
+            topEdgeY = 0f;
+            bottomEdgeY = 0f;
         }
 
         //* This will only be correct if there IS a collision to begin with. Otherwise, it is just a guess that isn't CollisionState.NONE

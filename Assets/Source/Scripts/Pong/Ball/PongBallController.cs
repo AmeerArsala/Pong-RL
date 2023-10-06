@@ -1,6 +1,7 @@
 //namespace Pong.Ball;
 using Pong.Ball;
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -23,16 +24,28 @@ namespace Pong.Ball {
         private float elapsedTrajectoryTime = 0.0f;
         private bool hasTrajectory = false;
 
-        // goal detection state
+        // goal detection
         private int ballStatus = BallStatus.NO_GOAL;
+        private Action OnScore, OnRebound;
 
         // collision detection helper
         private RectangularBodyFrame bodyFrame;
         private Rebounder rebounder;
 
+        // initialization check
+        private bool isInitialized = false;
+
+        public void Initialize(Action scoreProcedure, Action reboundProcedure) {
+            OnScore = scoreProcedure;
+            OnRebound = reboundProcedure;
+
+            isInitialized = true;
+        }
+
         void Awake()
         {
-            ZeroMotion();
+            // cancel motion: no more velocity and further derivatives! all 0
+            viewportMotion.ZeroOut();
         }
 
         // Start is called before the first frame update
@@ -44,6 +57,10 @@ namespace Pong.Ball {
         // Update is called once per frame
         void Update()
         {
+            if (!isInitialized) {
+                return;
+            }
+
             if (hasTrajectory) {
                 // calculate current velocity
                 Vector2 currentTotalViewportVelocity = viewportMotion.CalculateTotalVelocity(elapsedTrajectoryTime);
@@ -72,12 +89,10 @@ namespace Pong.Ball {
 
                 //* Score Point
                 ballStatus = BallStatus.GOAL_LEFT;
+                OnScore();
 
                 // Integrate Changes
                 transform.localPosition += actualLocalDelta;
-
-                // Don't let more updates make another score happen
-                SetFreeze(true);
                 return;
             } else if (bodyFrame.rightEdgeX + actualLocalDelta.x >= MAX_POS.x) { //* Right Boundary
                 actualLocalDelta.x = MAX_POS.x - bodyFrame.rightEdgeX;
@@ -86,12 +101,10 @@ namespace Pong.Ball {
                 
                 //* Score Point
                 ballStatus = BallStatus.GOAL_RIGHT;
+                OnScore();
 
                 // Integrate Changes
                 transform.localPosition += actualLocalDelta;
-
-                // Don't let more updates make another score happen
-                SetFreeze(true);
                 return;
             }
 
@@ -110,9 +123,7 @@ namespace Pong.Ball {
 
                 // Rebound
                 ballStatus = BallStatus.REBOUNDED;
-
-                // Debug: freeze so no double switch occurs
-                SetFreeze(true);
+                OnRebound();
                 return;
             }
             
@@ -155,6 +166,12 @@ namespace Pong.Ball {
             viewportMotion.ZeroOut();
         }
 
+        public void ResetBallStatus() {
+            ballStatus = BallStatus.NO_GOAL;
+            
+            bodyFrame.ResetState();
+        }
+
         public void SetFreeze(bool freeze) {
             hasTrajectory = !freeze;
         }
@@ -167,7 +184,7 @@ namespace Pong.Ball {
             return viewportMotion.RetrieveTrajectory(vpLocalPos);
         }
 
-        public int GetBallStatus() { return ballStatus; }
+        //public int GetBallStatus() { return ballStatus; }
 
         public bool HasTrajectory() { return hasTrajectory; }
         public float GetElapsedTrajectoryTime() { return elapsedTrajectoryTime; }
@@ -184,10 +201,6 @@ namespace Pong.Ball {
         public Rebounder Rebounder {
             get { return rebounder; }
             set { rebounder = value; }
-        }
-
-        public void ResetBallStatus() {
-            ballStatus = BallStatus.NO_GOAL;
         }
     }
 }
