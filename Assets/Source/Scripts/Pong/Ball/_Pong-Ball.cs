@@ -20,7 +20,7 @@ namespace Pong.Ball {
     */
     public partial class PongBallController : MonoBehaviour {}
 
-    public static class BallStatus {
+    /*public static class BallStatus {
         private const int GOAL = 1;
 
         public const int GOAL_LEFT = -GOAL;
@@ -35,5 +35,12 @@ namespace Pong.Ball {
         public static bool IsGoal(int ballStatus) {
             return Mathf.Abs(ballStatus) == GOAL;
         }
+    }*/
+
+    public static class BallGoal {
+        public const bool LEFT = true;
+        public const bool RIGHT = false;
+
+        // Note: we don't even need an INVERT() function because the ! operator already does that with bools! 
     }
 }
