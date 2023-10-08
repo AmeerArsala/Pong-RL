@@ -20,7 +20,7 @@ namespace Pong {
         // CONTEXT: public => reference in the Unity Editor
         public string player1Name = PlayerData.NO_NAME, player2Name = PlayerData.NO_NAME;
         public float playerSpeedVP = 1.00f; // per second; travel 100% vertical screen size in one second
-        public float ballSpeedVP = 0.45f;   // per second; travel 45% horizontal screen size in one second
+        public float ballSpeedVP = 0.65f;   // per second; travel 45% horizontal screen size in one second
         public float ballServeMaxAngle = (3f / 7f) * Mathf.PI;
         public float ballBounceMaxAngle = (3f / 7f) * Mathf.PI;
         public uint scoreToWin = GameConstants.DEFAULT_WIN_SCORE;
