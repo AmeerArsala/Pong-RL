@@ -125,8 +125,14 @@ namespace Pong.Ball {
             ballSprite.controller.BeginTrajectory(); // start the timer for y'(t)
         }
 
+        // Frame-dependent
         public void Update() {
             //TODO: feed to players?
+        }
+
+        // Time-dependent
+        public void FixedUpdate() {
+            //TODO: any other physics updates needed?
         }
 
         public void DestroyBall() {

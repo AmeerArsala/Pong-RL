@@ -14,6 +14,7 @@ namespace Pong.GamePlayer {
     public partial class PlayerController : MonoBehaviour
     {
         // parameters of trajectory; x velocity and beyond will ALWAYS be 0. For the sake of simplicity, any derivative beyond acceleration will be 0
+        // used to track motion rather than determine it
         // contains base viewport velocity (Vector2) and float[] yAccelerationAndBeyond in terms of viewport percentage y
         private readonly Motion2D viewportMotion = new Motion2D(); // this tracks motion, rather than controlling it
 
@@ -38,31 +39,40 @@ namespace Pong.GamePlayer {
                 return;
             }
 
-            float deltaY = RespondToInput();
+            //? put any frame-dependent updates here
+        }
+
+        // Time-dependent updates (such as physics)
+        void FixedUpdate() {
+            if (!isInitialized) {
+                return;
+            }
+
+            float deltaY = RespondToCommand(Time.fixedDeltaTime);
 
             //* Track Motion
             // calculate velocity at this frame
             Vector3 deltaPos = new Vector3(0f, deltaY, 0f);
-            Vector2 viewportVelocity = ToViewport(deltaPos) / Time.deltaTime;
+            Vector2 viewportVelocity = ToViewport(deltaPos) / Time.fixedDeltaTime;
 
             // calculate acceleration at this frame
             float deltaYVelocity = viewportVelocity.y - viewportMotion.velocity.y;
-            float viewportYAcceleration = deltaYVelocity / Time.deltaTime;
+            float viewportYAcceleration = deltaYVelocity / Time.fixedDeltaTime;
 
             // set the new velocity and acceleration
             viewportMotion.velocity.Set(viewportVelocity.x, viewportVelocity.y);
             viewportMotion.Y_Acceleration = viewportYAcceleration;
         }
 
-        protected float RespondToInput() {
+        protected float RespondToCommand(float dt) { // dt = delta_time
             float dy = 0f;
 
             if (Input.GetKey(controls.Up)) {
-                dy += DeltaY();
+                dy += DeltaY(dt);
             }
 
             if (Input.GetKey(controls.Down)) {
-                dy += -DeltaY();
+                dy += -DeltaY(dt);
             }
 
             //* Now that all the movement updates have been collected, time to apply them
@@ -72,11 +82,11 @@ namespace Pong.GamePlayer {
             return dy;
         }
 
-        protected float DeltaY() {
+        protected float DeltaY(float dt) {
             // ToLocal() but with a single value rather than a whole ass vector
             float dy_dt = PLAYER_SPEED_VP * BG_TRANSFORM.localScale.y;
             
-            return dy_dt * Time.deltaTime;
+            return dy_dt * dt;
         }
 
         public void MoveY(float deltaY) {

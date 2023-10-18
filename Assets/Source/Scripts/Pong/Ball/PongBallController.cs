@@ -16,7 +16,8 @@ using static Pong.GameHelpers;
 namespace Pong.Ball {
     public partial class PongBallController : MonoBehaviour
     {
-        // parameters of trajectory
+        // parameters of trajectory; x acceleration and beyond will ALWAYS be 0. For the sake of simplicity, any derivative beyond acceleration will be 0
+        // determines the motion of the ball
         // contains base viewport velocity (Vector2) and float[] yAccelerationAndBeyond in terms of viewport percentage y
         private readonly Motion2D viewportMotion = new Motion2D();
 
@@ -60,25 +61,34 @@ namespace Pong.Ball {
                 return;
             }
 
+            //? put any frame-dependent calculations here
+        }
+
+        // Time-dependent
+        void FixedUpdate() {
+            if (!isInitialized) {
+                return;
+            }
+
             if (hasTrajectory) {
                 // calculate current velocity
                 Vector2 currentTotalViewportVelocity = viewportMotion.CalculateTotalVelocity(elapsedTrajectoryTime);
 
                 // motion
-                MoveLocal(ToLocal(currentTotalViewportVelocity));
+                MoveLocal(ToLocal(currentTotalViewportVelocity), Time.fixedDeltaTime);
 
-                elapsedTrajectoryTime += Time.deltaTime;
+                elapsedTrajectoryTime += Time.fixedDeltaTime;
             }
         }
 
         //* Deals with Movement, and Collision + Interactions as a Result of that movement
-        public void MoveLocal(Vector3 localDelta_dt) {
+        public void MoveLocal(Vector3 localDelta_dt, float dt) { // dt = delta time
             // origin is in the center
             Vector3 MAX_POS = BG_TRANSFORM.localScale / 2f;
             Vector3 MIN_POS = -MAX_POS;
 
             // local velocity * delta time = local delta pos ("delta y")
-            Vector3 actualLocalDelta = localDelta_dt * Time.deltaTime;
+            Vector3 actualLocalDelta = localDelta_dt * dt;
             
             //* Scoring Collisions
             if (bodyFrame.leftEdgeX + actualLocalDelta.x <= MIN_POS.x) { //* Left Boundary

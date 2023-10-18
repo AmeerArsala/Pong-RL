@@ -34,6 +34,8 @@ namespace Pong.Physics {
         // Update is called once per frame
         void Update()
         {
+            // Since it is just setting dimensions, this is frame-dependent
+
             HalfBodyDimensions = ToVector2(transform.localScale) / 2f;
 
             // origin is in the center
@@ -90,10 +92,6 @@ namespace Pong.Physics {
             SetCollisionStates(MostLikelyCollisionState(other), other);
             return true;
         }
-
-        /*public bool CollidesWith(RectangularBodyFrame other) {
-            return HeadOnCollidesWith(other) || other.HeadOnCollidesWith(this);
-        }*/
 
         //* ONLY call this once CollidesWith() verifies that there IS a collision point
         //* Therefore, this assumes that one exists

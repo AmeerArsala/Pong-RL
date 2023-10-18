@@ -75,6 +75,16 @@ namespace Pong {
             ball.Update(); // didn't call this before the player updates for a better user experience
         }
 
+        // Time-dependent
+        void FixedUpdate() {
+            // Player Fixed Updates
+            player1.FixedUpdate();
+            player2.FixedUpdate();
+
+            // PongBall Fixed Update
+            ball.FixedUpdate();
+        }
+
         public string GetCurrentScore() {
             return player1.GetScoreboard().GetScore() + "-" + player2.GetScoreboard().GetScore();
         }

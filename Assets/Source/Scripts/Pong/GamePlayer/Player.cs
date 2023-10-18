@@ -32,7 +32,7 @@ namespace Pong.GamePlayer {
 
         // For physics
         private readonly ForceMap forceMap;
-    
+
         private Player opponent;
 
         // load from data
@@ -64,6 +64,7 @@ namespace Pong.GamePlayer {
             // decide name if not named
             if (playerName.Equals(PlayerData.NO_NAME)) { // empty => no name => current date time name
                 playerName = DateTime.Now.ToString("MM/dd/yyyy H:mm");
+                Debug.Log("Player Name: " + playerName);
             }
 
             // initialize and set name
@@ -85,11 +86,15 @@ namespace Pong.GamePlayer {
             set { opponent = value; }
         }
 
+        // Frame-dependent 
         public void Update() {
+            //TODO: playerData.feed(...);
+        }
+
+        // Time-dependent
+        public void FixedUpdate() {
             forceMap.PaddleVelocity = ToLocal(playerSprite.controller.GetViewportMotionTracker().velocity).y;
             forceMap.PaddleAcceleration = ToLocal(new Vector2(0f, playerSprite.controller.GetViewportMotionTracker().Y_Acceleration)).y;
-
-            //TODO: playerData.feed(...);
         }
 
         public void ScorePoint() {
@@ -100,7 +105,7 @@ namespace Pong.GamePlayer {
             //TODO ...
             //? update RL agent?
         }
-
+        
         public Rebounder AsRebounder() {
             return new Rebounder(forceMap, playerSprite.gameObj.GetComponent<RectangularBodyFrame>());
         }
@@ -120,4 +125,33 @@ namespace Pong.GamePlayer {
             SetLocalPaddleDimensionsFromVP(vpDimensions.x, vpDimensions.y);
         }
     }
+
+    /*public partial class HumanPlayer : Player {
+
+
+        public HumanPlayer() {}
+    }*/
+    
+    /**
+    ** Contains a bunch of methods to be implemented by a computer player 
+    ** 
+    */
+    /*public abstract partial class AIPlayer : Player {
+        // load from data?
+        public AIPlayer(PlayerData playerData, GameObject sprite, Scoreboard scoreboard) {
+            this.playerData = playerData;
+            this.scoreboard = scoreboard;
+
+            //TODO: add controller interface
+
+            // collision detection
+            RectangularBodyFrame bodyFrame = sprite.AddComponent<RectangularBodyFrame>();
+
+            // collision forces
+            forceMap = new ForceMap(sprite.transform);
+
+            // wrap it up
+            playerSprite = new ControlledGameObject<PlayerController>(sprite, controller);
+        }
+    }*/
 }
