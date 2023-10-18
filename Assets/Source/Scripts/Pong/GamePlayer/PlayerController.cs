@@ -18,13 +18,7 @@ namespace Pong.GamePlayer {
         // contains base viewport velocity (Vector2) and float[] yAccelerationAndBeyond in terms of viewport percentage y
         private readonly Motion2D viewportMotion = new Motion2D(); // this tracks motion, rather than controlling it
 
-        private bool isInitialized = false;
-        private PlayerControls controls;
-
-        public void InitializeControls(PlayerControls controls) {
-            this.controls = controls;
-            isInitialized = true;
-        }
+        public PlayerCommandSensors commandSensors = new PlayerCommandSensors();
 
         // Start is called before the first frame update
         void Start()
@@ -35,20 +29,12 @@ namespace Pong.GamePlayer {
         // Update is called once per frame
         void Update()
         {
-            if (!isInitialized) {
-                return;
-            }
-
             //? put any frame-dependent updates here
         }
 
         // Time-dependent updates (such as physics)
         void FixedUpdate() {
-            if (!isInitialized) {
-                return;
-            }
-
-            float deltaY = RespondToCommand(Time.fixedDeltaTime);
+            float deltaY = commandSensors.Do_Nothing ? 0f : RespondToCommand(Time.fixedDeltaTime);
 
             //* Track Motion
             // calculate velocity at this frame
@@ -67,11 +53,11 @@ namespace Pong.GamePlayer {
         protected float RespondToCommand(float dt) { // dt = delta_time
             float dy = 0f;
 
-            if (Input.GetKey(controls.Up)) {
+            if (commandSensors.Move_Up) {
                 dy += DeltaY(dt);
             }
 
-            if (Input.GetKey(controls.Down)) {
+            if (commandSensors.Move_Down) {
                 dy += -DeltaY(dt);
             }
 
@@ -105,7 +91,6 @@ namespace Pong.GamePlayer {
             transform.localPosition += new Vector3(0f, deltaY, 0f);
         }
 
-        public bool IsInitialized() { return isInitialized; }
         public Motion2D GetViewportMotionTracker() { return viewportMotion; }
     }
 }

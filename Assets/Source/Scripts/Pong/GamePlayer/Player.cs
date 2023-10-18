@@ -23,6 +23,8 @@ namespace Pong.GamePlayer {
     ** PlayerData playerData 
     */
     public partial class Player {
+        private static uint UID = 0;
+
         // For RL and save/loading
         private PlayerData playerData;
 
@@ -36,13 +38,12 @@ namespace Pong.GamePlayer {
         private Player opponent;
 
         // load from data
-        public Player(PlayerData playerData, GameObject sprite, PlayerControls controls, Scoreboard scoreboard) {
+        public Player(PlayerData playerData, GameObject sprite, Scoreboard scoreboard) {
             this.playerData = playerData;
             this.scoreboard = scoreboard;
 
             // add + initialize controller
             PlayerController controller = sprite.AddComponent<PlayerController>();
-            controller.InitializeControls(controls);
 
             // collision detection
             RectangularBodyFrame bodyFrame = sprite.AddComponent<RectangularBodyFrame>();
@@ -54,24 +55,31 @@ namespace Pong.GamePlayer {
             playerSprite = new ControlledGameObject<PlayerController>(sprite, controller);
         }
 
-        public static Player CreateNew(string name, GameObject prefab, Vector2 viewportPos, PlayerControls controls, TMP_Text scoreText) {
-            // create paddle
-            GameObject paddle = GameObject.Instantiate(prefab, ToLocal(viewportPos), Quaternion.identity);
-
+        public static string CreateName(string name) {
             // default value
             string playerName = name;
 
             // decide name if not named
             if (playerName.Equals(PlayerData.NO_NAME)) { // empty => no name => current date time name
-                playerName = DateTime.Now.ToString("MM/dd/yyyy H:mm" + "_" + controls.ToString()); // added for uniqueness 
+                playerName = DateTime.Now.ToString("MM/dd/yyyy H:mm" + "_" + UID++);
                 Debug.Log("Player Name: " + playerName);
             }
 
-            // initialize and set name
+            return playerName;
+        }
+
+        public static Player CreateNew(string name, GameObject prefab, Vector2 viewportPos, TMP_Text scoreText) {
+            // create paddle
+            GameObject paddle = GameObject.Instantiate(prefab, ToLocal(viewportPos), Quaternion.identity);
+
+            // validate name or have a default value
+            string playerName = CreateName(name);
+
+            // initialize data
             PlayerData playerData = ScriptableObject.CreateInstance<PlayerData>();
             playerData.Initialize(playerName, trackHistory: false);
 
-            return new Player(playerData, paddle, controls, new Scoreboard(scoreText));
+            return new Player(playerData, paddle, new Scoreboard(scoreText));
         }
 
         //TODO:
@@ -87,17 +95,22 @@ namespace Pong.GamePlayer {
         }
 
         // Frame-dependent 
-        public void Update() {
-            //TODO: playerData.feed(...);
+        public virtual void Update() {
+            //? put any frame-dependent updates here
         }
 
         // Time-dependent
-        public void FixedUpdate() {
+        public virtual void FixedUpdate() {
             forceMap.PaddleVelocity = ToLocal(playerSprite.controller.GetViewportMotionTracker().velocity).y;
             forceMap.PaddleAcceleration = ToLocal(new Vector2(0f, playerSprite.controller.GetViewportMotionTracker().Y_Acceleration)).y;
         }
 
-        public void ScorePoint() {
+        public virtual void FeedData(Vector2 vpPos, Vector2 vpOpponentPos, Vector2[] ballMotion) {
+            playerData.Feed(vpPos, vpOpponentPos, ballMotion);
+            //? RL agent makes an inference
+        }
+
+        public virtual void ScorePoint() {
             // Game: score point
             scoreboard.ScorePoint();
 
@@ -114,8 +127,8 @@ namespace Pong.GamePlayer {
             Vector3 bgScale = GameCache.BG_TRANSFORM.localScale;
 
             playerSprite.transform.localScale = new Vector3(
-                vpXThickness * bgScale.x,
-                vpYLength * bgScale.y,
+                ToLocalX(vpXThickness),
+                ToLocalY(vpYLength),
                 playerSprite.transform.localScale.z
             );
         }
@@ -126,11 +139,38 @@ namespace Pong.GamePlayer {
         }
     }
 
-    /*public partial class HumanPlayer : Player {
+    public partial class HumanPlayer : Player {
+        private readonly PlayerControls controls;
 
+        public HumanPlayer(PlayerData playerData, GameObject sprite, PlayerControls controls, Scoreboard scoreboard) : base(playerData, sprite, scoreboard) {
+            this.controls = controls;
+        }
 
-        public HumanPlayer() {}
-    }*/
+        public static HumanPlayer CreateNew(string name, GameObject prefab, Vector2 viewportPos, PlayerControls controls, TMP_Text scoreText) {
+            // create paddle
+            GameObject paddle = GameObject.Instantiate(prefab, ToLocal(viewportPos), Quaternion.identity);
+
+            // validate name or have a default value
+            string playerName = CreateName(name);
+
+            // initialize data
+            PlayerData playerData = ScriptableObject.CreateInstance<PlayerData>();
+            playerData.Initialize(playerName, trackHistory: false); //TODO: include option?
+
+            return new HumanPlayer(playerData, paddle, controls, new Scoreboard(scoreText));
+        }
+
+        public override void Update()
+        {
+            //base.Update();
+            //* Listen for User Input
+            playerSprite.controller.commandSensors.Sense(
+                moveUp: Input.GetKey(controls.Up),
+                moveDown: Input.GetKey(controls.Down));
+        }
+
+        public PlayerControls GetPlayerControls() { return controls; }
+    }
     
     /**
     ** Contains a bunch of methods to be implemented by a computer player 

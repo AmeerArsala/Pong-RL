@@ -77,6 +77,22 @@ namespace Pong {
 
             return viewportVec;
         }
+
+        public static float ToLocalX(float vpX) {
+            return GameCache.BG_TRANSFORM.localScale.x * vpX;
+        }
+
+        public static float ToLocalY(float vpY) {
+            return GameCache.BG_TRANSFORM.localScale.y * vpY;
+        }
+
+        public static float ToViewportX(float localX) {
+            return localX / GameCache.BG_TRANSFORM.localScale.x;
+        }
+
+        public static float ToViewportY(float localY) {
+            return localY / GameCache.BG_TRANSFORM.localScale.y;
+        }
     }
 
     public partial class GameManager : MonoBehaviour {}

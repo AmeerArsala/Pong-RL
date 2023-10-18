@@ -36,9 +36,9 @@ namespace Pong.Ball {
 
                 attacker.ScorePoint();
 
-                //TODO: [tiny delay]
+                //? [tiny delay]
                 Reset();
-                //TODO: [small delay]
+                //? [small delay]
                 Serve();
             };
 
@@ -127,28 +127,29 @@ namespace Pong.Ball {
 
         // Frame-dependent
         public void Update() {
+            //? put any frame-dependent updates here
+        }
+
+        // Time-dependent
+        public void FixedUpdate() {
+            // This would go in Update(), but Unity ML-Agents has limitations regarding that. In order to not have the agent decisions be desynced, feeding is here
+
             //* Feed data to players
-            PlayerData attackerData = attacker.GetPlayerData();
-            PlayerData defenderData = attacker.Opponent.GetPlayerData();
+            Player defender = attacker.Opponent;
 
             // this if statement is an optimization to avoid unnecessary calculations
-            if (attackerData.TrackHistory || defenderData.TrackHistory) {
+            if (attacker.GetPlayerData().TrackHistory || defender.GetPlayerData().TrackHistory) {
                 // Calculate ball trajectory
                 Vector2[] ballTrajectory = ballSprite.controller.RetrieveBallTrajectory();
 
                 // Calculate viewport positions of Players
                 Vector2 attackerViewportPos = ToViewport(attacker.playerSprite.transform.localPosition);
-                Vector2 defenderViewportPos = ToViewport(attacker.Opponent.playerSprite.transform.localPosition);
+                Vector2 defenderViewportPos = ToViewport(defender.playerSprite.transform.localPosition);
 
                 // ATTEMPT TO FEED THEM
-                attackerData.Feed(attackerViewportPos, defenderViewportPos, ballTrajectory);
-                defenderData.Feed(defenderViewportPos, attackerViewportPos, ballTrajectory);
+                attacker.FeedData(attackerViewportPos, defenderViewportPos, ballTrajectory);
+                defender.FeedData(defenderViewportPos, attackerViewportPos, ballTrajectory);
             }
-        }
-
-        // Time-dependent
-        public void FixedUpdate() {
-            //? any other physics updates needed?
         }
 
         public void DestroyBall() {
@@ -177,15 +178,12 @@ namespace Pong.Ball {
         }
 
         public void SetLocalScaleFromVPY(float viewportY) {
-            Vector3 bgScale = BG_TRANSFORM.localScale;
-
+            float scale = ToLocalY(viewportY);
             ballSprite.transform.localScale = new Vector3(
-                viewportY * bgScale.y, // square
-                viewportY * bgScale.y, // square
+                scale, // square
+                scale, // square
                 ballSprite.transform.localScale.z
             );
-
-            //Debug.Log("LocalScale: " + sprite.transform.localScale);
         }
 
         public static Vector3 GetStartLocalPosition() {

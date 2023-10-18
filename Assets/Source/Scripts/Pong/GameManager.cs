@@ -51,8 +51,8 @@ namespace Pong {
             //Audio.Cache.SFX = Audio.SfxPack.FromRegisteredMappings();
 
             // Initialize Players/Pong Paddles
-            player1 = Player.CreateNew(player1Name, playerPrefab, GameConstants.RIGHT_PADDLE_START_POSITION, GameConstants.RIGHT_PADDLE_CONTROLS, player1scoreText);
-            player2 = Player.CreateNew(player2Name, playerPrefab, GameConstants.LEFT_PADDLE_START_POSITION, GameConstants.LEFT_PADDLE_CONTROLS, player2scoreText);
+            player1 = HumanPlayer.CreateNew(player1Name, playerPrefab, GameConstants.RIGHT_PADDLE_START_POSITION, GameConstants.RIGHT_PADDLE_CONTROLS, player1scoreText);
+            player2 = HumanPlayer.CreateNew(player2Name, playerPrefab, GameConstants.LEFT_PADDLE_START_POSITION, GameConstants.LEFT_PADDLE_CONTROLS, player2scoreText);
             
             // Make them enemies!!! >:)
             player1.Opponent = player2;
