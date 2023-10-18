@@ -188,8 +188,6 @@ namespace Pong.Ball {
             return viewportMotion.RetrieveTrajectory(vpLocalPos);
         }
 
-        //public int GetBallStatus() { return ballStatus; }
-
         public bool HasTrajectory() { return hasTrajectory; }
         public float GetElapsedTrajectoryTime() { return elapsedTrajectoryTime; }
 

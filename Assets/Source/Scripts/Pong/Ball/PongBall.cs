@@ -127,12 +127,28 @@ namespace Pong.Ball {
 
         // Frame-dependent
         public void Update() {
-            //TODO: feed to players?
+            //* Feed data to players
+            PlayerData attackerData = attacker.GetPlayerData();
+            PlayerData defenderData = attacker.Opponent.GetPlayerData();
+
+            // this if statement is an optimization to avoid unnecessary calculations
+            if (attackerData.TrackHistory || defenderData.TrackHistory) {
+                // Calculate ball trajectory
+                Vector2[] ballTrajectory = ballSprite.controller.RetrieveBallTrajectory();
+
+                // Calculate viewport positions of Players
+                Vector2 attackerViewportPos = ToViewport(attacker.playerSprite.transform.localPosition);
+                Vector2 defenderViewportPos = ToViewport(attacker.Opponent.playerSprite.transform.localPosition);
+
+                // ATTEMPT TO FEED THEM
+                attackerData.Feed(attackerViewportPos, defenderViewportPos, ballTrajectory);
+                defenderData.Feed(defenderViewportPos, attackerViewportPos, ballTrajectory);
+            }
         }
 
         // Time-dependent
         public void FixedUpdate() {
-            //TODO: any other physics updates needed?
+            //? any other physics updates needed?
         }
 
         public void DestroyBall() {

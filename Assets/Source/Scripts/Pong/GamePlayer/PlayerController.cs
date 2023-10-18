@@ -19,7 +19,7 @@ namespace Pong.GamePlayer {
         private readonly Motion2D viewportMotion = new Motion2D(); // this tracks motion, rather than controlling it
 
         private bool isInitialized = false;
-        public PlayerControls controls;
+        private PlayerControls controls;
 
         public void InitializeControls(PlayerControls controls) {
             this.controls = controls;
@@ -29,7 +29,7 @@ namespace Pong.GamePlayer {
         // Start is called before the first frame update
         void Start()
         {
-
+            // Start
         }
 
         // Update is called once per frame

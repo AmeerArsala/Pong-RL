@@ -63,13 +63,13 @@ namespace Pong.GamePlayer {
 
             // decide name if not named
             if (playerName.Equals(PlayerData.NO_NAME)) { // empty => no name => current date time name
-                playerName = DateTime.Now.ToString("MM/dd/yyyy H:mm");
+                playerName = DateTime.Now.ToString("MM/dd/yyyy H:mm" + "_" + controls.ToString()); // added for uniqueness 
                 Debug.Log("Player Name: " + playerName);
             }
 
             // initialize and set name
             PlayerData playerData = ScriptableObject.CreateInstance<PlayerData>();
-            playerData.Initialize(playerName);
+            playerData.Initialize(playerName, trackHistory: false);
 
             return new Player(playerData, paddle, controls, new Scoreboard(scoreText));
         }

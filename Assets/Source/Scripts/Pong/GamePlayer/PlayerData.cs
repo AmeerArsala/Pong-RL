@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 using Pong.RL;
+using Pong.Physics;
 
 namespace Pong.GamePlayer {
     /*  For Pong RL, we will only care about the statistics of:
@@ -13,7 +14,7 @@ namespace Pong.GamePlayer {
         *   Ball's relative distance: vec2[X distance away (absolute value) from goal, Y distance away from Paddle]
         *   Ball's velocity: vec2[X speed towards goal (absolute value), Y]
         ?   Observed Y position of the other Paddle
-        ??  Observed Y velocity of the other Paddle; maybe delegate the observation of this to another model?
+        ??  Observed Y velocity of the other Paddle
         ??? Potential add-on: Y-acceleration and further derivatives of Y. Not x tho, that would be very stupid and not even make physical sense
     */
     public partial class PlayerData : ScriptableObject {
@@ -24,13 +25,16 @@ namespace Pong.GamePlayer {
         [SerializeField] private bool trackHistory = TRACK_HISTORY_DEFAULT;
         [SerializeField] private readonly List<DataUnit> history = new List<DataUnit>();
 
-        //TODO: fields of action-reward history (if boolean allows), agent/model id: string, etc.
+        // Remember, we eventually want a database that will autogenerate stuff like agent/model id: string, etc.
         // ? Maybe use burst compilation for tracking history?
-
-        private Vector2[] relativeBallMotion;
 
         public void Initialize(string playerName) {
             this.playerName = playerName;
+        }
+
+        public void Initialize(string playerName, bool trackHistory) {
+            this.playerName = playerName;
+            this.trackHistory = trackHistory;
         }
 
         public string GetPlayerName() {
@@ -46,34 +50,28 @@ namespace Pong.GamePlayer {
             return history;
         }
 
-        public Vector2[] RelativeBallMotion {
-            get { return relativeBallMotion; }
-            set { relativeBallMotion = value; }
-        }
-
         /**
         * @param Vector2 playerPos - (x, y)
         * @param Vector2 opponentPos - (x, y)
         * @param Vector2[] relativeBallMotion - [(x, y), (x', y'), (x'', y''), ...]; Note that x'' and beyond will be 0; x' is constant, so it doesn't really matter
         ** (x, y) in [0.0, 1.0]. for x: 0.0 being at the player goal and 1.0 being at the opponent goal
-        ** x' is constant and uses the same scale. It can be either positive (heading away from Player) or negative (heading towards the player) 
+        ** x' is constant and uses the same scale. After preprocessing, it can be either positive (heading away from Player) or negative (heading towards the player) 
         ** x'' and beyond = 0
         ** y uses a universal vertical axis (not specific per Paddle)
         */
-        public void feed(Vector2 playerPos, Vector2 opponentPos, Vector2[] relativeBallMotion) {
-            feed(playerPos.y, opponentPos.y, relativeBallMotion);
-        }
-
-        public void feed(float playerPosY, float opponentPosY, Vector2[] relativeBallMotion) {
+        public void Feed(Vector2 playerPos, Vector2 opponentPos, Vector2[] ballMotion) {
             if (!trackHistory) {
                 return;
             }
+            
+            // Relativize to the player
+            Vector2[] relativeBallMotion = Motion2D.RelativizeTrajectoryByX(ballMotion, playerPos.x);
 
             float[] observation = new float[2 + relativeBallMotion.Length];
             
             // player Y pos and opponent Y pos
-            observation[0] = playerPosY;
-            observation[1] = opponentPosY;
+            observation[0] = playerPos.y;
+            observation[1] = opponentPos.y;
 
             // relative ball positions
             Vector2 relativeBallPos = relativeBallMotion[0];

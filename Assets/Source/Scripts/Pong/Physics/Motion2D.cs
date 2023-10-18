@@ -62,12 +62,43 @@ namespace Pong.Physics {
             trajectory[0] = position;
             trajectory[1] = velocity;
 
-            for (int i = 0; i < yAccelerationAndBeyond.Length; ++i) {
-                int i_trajectory = i + 2;
+            for (int i = 0; i < yAccelerationAndBeyond.Length; ++i) { // starts at acceleration
+                int i_trajectory = i + 2; // "nth" derivative in a sense
                 trajectory[i_trajectory] = new Vector2(0.0f, yAccelerationAndBeyond[i]); // there is no x acceleration and beyonod, that would be very stupid
             }
 
             return trajectory;
+        }
+
+        public Vector2[] RetrieveXRelativeTrajectory(Vector2 actualPosition, float relativeToX) {
+            Vector2[] trajectory = RetrieveTrajectory(actualPosition); 
+            
+            return RelativizeTrajectoryByX(trajectory, relativeToX);
+        }
+
+        public static Vector2[] RelativizeTrajectoryByX(Vector2[] trajectory, float relativeToX) {
+            Vector2[] xRelativeTrajectory = new Vector2[trajectory.Length];
+            Vector2 position = trajectory[0];
+
+            // positive: (diff > 0) => relative to the right
+            // negative: (diff < 0) => relative to the left
+            float diff = relativeToX - position.x;
+            
+            // Relative position
+            xRelativeTrajectory[0] = new Vector2(Mathf.Abs(diff), position.y);
+
+            for (int i = 1; i < trajectory.Length; ++i) {
+                Vector2 motionParam_i = trajectory[i];
+                
+                float relativeMotionX = Mathf.Abs(motionParam_i.x);
+                if (motionParam_i.x != 0f && Mathf.Sign(motionParam_i.x) != Mathf.Sign(diff)) {
+                    relativeMotionX *= -1;
+                }
+
+                xRelativeTrajectory[i] = new Vector2(relativeMotionX, motionParam_i.y);
+            }
+
+            return xRelativeTrajectory;
         }
     }
 }
