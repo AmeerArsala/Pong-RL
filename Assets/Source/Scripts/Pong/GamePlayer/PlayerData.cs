@@ -12,28 +12,6 @@ using Pong.RL;
 using Pong.Physics;
 
 namespace Pong.GamePlayer {
-    [System.Serializable]
-    public class PlayerDataBundle { //* Will serialize to JSON
-        private static uint UID = 0;
-        private const char DELIMITER = '_';
-
-        public string player_name;
-        public readonly List<DataUnit> data_history;
-        public string date_time;
-
-        public PlayerDataBundle(string player_name, List<DataUnit> data_history) {
-            this.player_name = player_name;
-            this.data_history = data_history;
-
-            date_time = DateTime.Now.ToString("MM/dd/yyyy H:mm" + DELIMITER + UID++);
-        }
-
-        public string FileName() {
-            // assume player_name allows all legal characters (will design for that later)
-            return player_name + DELIMITER + date_time.Replace('/', DELIMITER).Replace(':', DELIMITER);
-        }
-    }
-
     /*  For Pong RL, we will only care about the statistics of:
         *   Y position of Paddle
         *   Ball's relative distance: vec2[X distance away (absolute value) from goal, Y distance away from Paddle]
@@ -166,5 +144,27 @@ namespace Pong.GamePlayer {
 
             return null;
         }
-    } 
+    }
+
+    [System.Serializable]
+    public class PlayerDataBundle { //* Will serialize to JSON
+        private static uint UID = 0;
+        private const char DELIMITER = '_';
+
+        public string player_name;
+        public readonly List<DataUnit> data_history;
+        public string date_time;
+
+        public PlayerDataBundle(string player_name, List<DataUnit> data_history) {
+            this.player_name = player_name;
+            this.data_history = data_history;
+
+            date_time = DateTime.Now.ToString("MM/dd/yyyy H:mm" + DELIMITER + UID++);
+        }
+
+        public string FileName() {
+            // assume player_name allows all legal characters (will design for that later)
+            return player_name + DELIMITER + date_time.Replace('/', DELIMITER).Replace(':', DELIMITER);
+        }
+    }
 }
