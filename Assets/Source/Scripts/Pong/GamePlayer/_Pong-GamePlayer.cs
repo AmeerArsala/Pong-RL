@@ -11,10 +11,12 @@ namespace Pong.GamePlayer {
     // Human Player
     public partial class HumanPlayer : Player {}
 
+    // Cheating Computer Player
+    public partial class CheatingPlayer : Player {}
+
     // AI Players
-    /*public abstract partial class AIPlayer : Player {}
-    public partial class CheatingPlayer : AIPlayer {}
-    public partial class RLPlayer : AIPlayer {}*/
+    /*public abstract partial class MLPlayer : Player {}
+    public partial class RLPlayer : MLPlayer {}*/
 
     //* PlayerData
     public partial class PlayerData : ScriptableObject {}
@@ -41,6 +43,10 @@ namespace Pong.GamePlayer {
             Move_Up = moveUp;
             Move_Down = moveDown;
             Do_Nothing = (moveUp == moveDown); // if both are true, they cancel each other out. if both are false, no need to do anything
+        }
+
+        public void Reset() {
+            Set(false, false, false);
         }
     }
 

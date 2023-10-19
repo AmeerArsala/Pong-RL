@@ -136,20 +136,19 @@ namespace Pong.Ball {
 
             //* Feed data to players
             Player defender = attacker.Opponent;
+            
+            //TODO: that if statement as the optimization but instead of trackHistory, accessHistory or accessData
 
-            // this if statement is an optimization to avoid unnecessary calculations
-            if (attacker.GetPlayerData().TrackHistory || defender.GetPlayerData().TrackHistory) {
-                // Calculate ball trajectory
-                Vector2[] ballTrajectory = ballSprite.controller.RetrieveBallTrajectory();
+            // Calculate Ball Trajectory
+            Vector2[] ballTrajectory = ballSprite.controller.RetrieveBallTrajectory();
 
-                // Calculate viewport positions of Players
-                Vector2 attackerViewportPos = ToViewport(attacker.playerSprite.transform.localPosition);
-                Vector2 defenderViewportPos = ToViewport(defender.playerSprite.transform.localPosition);
+            // Calculate viewport positions of Players
+            Vector2 attackerViewportPos = ToViewport(attacker.playerSprite.transform.localPosition);
+            Vector2 defenderViewportPos = ToViewport(defender.playerSprite.transform.localPosition);
 
-                // ATTEMPT TO FEED THEM
-                attacker.FeedData(attackerViewportPos, defenderViewportPos, ballTrajectory);
-                defender.FeedData(defenderViewportPos, attackerViewportPos, ballTrajectory);
-            }
+            // ATTEMPT TO FEED THEM
+            attacker.FeedData(attackerViewportPos, defenderViewportPos, ballTrajectory);
+            defender.FeedData(defenderViewportPos, attackerViewportPos, ballTrajectory);
         }
 
         public void DestroyBall() {

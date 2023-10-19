@@ -25,6 +25,8 @@ namespace Pong.GamePlayer {
         [SerializeField] private bool trackHistory = TRACK_HISTORY_DEFAULT;
         [SerializeField] private readonly List<DataUnit> history = new List<DataUnit>();
 
+        private DataUnit current = null;
+
         // Remember, we eventually want a database that will autogenerate stuff like agent/model id: string, etc.
         // ? Maybe use burst compilation for tracking history?
 
@@ -61,6 +63,7 @@ namespace Pong.GamePlayer {
         */
         public void Feed(Vector2 playerPos, Vector2 opponentPos, Vector2[] ballMotion) {
             if (!trackHistory) {
+                current = null;
                 return;
             }
             
@@ -98,6 +101,8 @@ namespace Pong.GamePlayer {
             // add to history
             DataUnit dataStep = new DataUnit(observation);
             history.Add(dataStep);
+
+            current = dataStep;
         }
     }
 }

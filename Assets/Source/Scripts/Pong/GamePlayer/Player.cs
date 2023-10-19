@@ -68,7 +68,7 @@ namespace Pong.GamePlayer {
             return playerName;
         }
 
-        public static Player CreateNew(string name, GameObject prefab, Vector2 viewportPos, TMP_Text scoreText) {
+        public static Player CreateNew(string name, GameObject prefab, Vector2 viewportPos, TMP_Text scoreText, bool recordHistory=false) {
             // create paddle
             GameObject paddle = GameObject.Instantiate(prefab, ToLocal(viewportPos), Quaternion.identity);
 
@@ -77,7 +77,7 @@ namespace Pong.GamePlayer {
 
             // initialize data
             PlayerData playerData = ScriptableObject.CreateInstance<PlayerData>();
-            playerData.Initialize(playerName, trackHistory: false);
+            playerData.Initialize(playerName, recordHistory);
 
             return new Player(playerData, paddle, new Scoreboard(scoreText));
         }
@@ -139,6 +139,7 @@ namespace Pong.GamePlayer {
         }
     }
 
+    //* An actual Human Player with controls and all
     public partial class HumanPlayer : Player {
         private readonly PlayerControls controls;
 
@@ -171,6 +172,39 @@ namespace Pong.GamePlayer {
 
         public PlayerControls GetPlayerControls() { return controls; }
     }
+
+    //* A cheating computer player
+    public partial class CheatingPlayer : Player {
+        public CheatingPlayer(PlayerData playerData, GameObject sprite, Scoreboard scoreboard) : base(playerData, sprite, scoreboard) {
+            // constructor
+        }
+
+        public static CheatingPlayer CreateNew(string name, GameObject prefab, Vector2 viewportPos, TMP_Text scoreText, bool recordHistory=false) {
+            // create paddle
+            GameObject paddle = GameObject.Instantiate(prefab, ToLocal(viewportPos), Quaternion.identity);
+
+            // validate name or have a default value
+            string playerName = CreateName(name);
+
+            // initialize data
+            PlayerData playerData = ScriptableObject.CreateInstance<PlayerData>();
+            playerData.Initialize(playerName, recordHistory);
+
+            return new CheatingPlayer(playerData, paddle, new Scoreboard(scoreText));
+        }
+
+        public override void FeedData(Vector2 vpPos, Vector2 vpOpponentPos, Vector2[] ballMotion)
+        {
+            base.FeedData(vpPos, vpOpponentPos, ballMotion);
+
+            Vector2 ballPosition = ballMotion[0];
+            Vector2 localPosition = ToViewport(playerSprite.transform.localPosition);
+
+            playerSprite.controller.commandSensors.Sense(
+                moveUp: (ballPosition.y > localPosition.y),
+                moveDown: (ballPosition.y < localPosition.y));
+        }
+    }
     
     /**
     ** Contains a bunch of methods to be implemented by a computer player 
@@ -181,8 +215,6 @@ namespace Pong.GamePlayer {
         public AIPlayer(PlayerData playerData, GameObject sprite, Scoreboard scoreboard) {
             this.playerData = playerData;
             this.scoreboard = scoreboard;
-
-            //TODO: add controller interface
 
             // collision detection
             RectangularBodyFrame bodyFrame = sprite.AddComponent<RectangularBodyFrame>();

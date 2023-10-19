@@ -52,7 +52,8 @@ namespace Pong {
 
             // Initialize Players/Pong Paddles
             player1 = HumanPlayer.CreateNew(player1Name, playerPrefab, GameConstants.RIGHT_PADDLE_START_POSITION, GameConstants.RIGHT_PADDLE_CONTROLS, player1scoreText);
-            player2 = HumanPlayer.CreateNew(player2Name, playerPrefab, GameConstants.LEFT_PADDLE_START_POSITION, GameConstants.LEFT_PADDLE_CONTROLS, player2scoreText);
+            player2 = CheatingPlayer.CreateNew(player2Name, playerPrefab, GameConstants.LEFT_PADDLE_START_POSITION, player2scoreText);
+            //player2 = HumanPlayer.CreateNew(player2Name, playerPrefab, GameConstants.LEFT_PADDLE_START_POSITION, GameConstants.LEFT_PADDLE_CONTROLS, player2scoreText);
             
             // Make them enemies!!! >:)
             player1.Opponent = player2;
