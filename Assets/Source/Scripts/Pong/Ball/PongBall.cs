@@ -110,6 +110,10 @@ namespace Pong.Ball {
 
         // serve the ball
         public void Serve() {
+            if (serveAngles.Count == 0) { // if stack is empty
+                return;
+            }
+
             (float angle, bool serverDesire) = serveAngles.Pop();
             float speed = BALL_SPEED_VP; // in terms of viewport x percentage
 

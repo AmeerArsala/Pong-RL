@@ -15,15 +15,15 @@ namespace Pong.GamePlayer {
     public partial class CheatingPlayer : Player {}
 
     // AI Players
-    /*public abstract partial class MLPlayer : Player {}
-    public partial class RLPlayer : MLPlayer {}*/
+    public abstract partial class MLPlayer : Player {}
+    public partial class RLPlayer : MLPlayer {}
 
     //* PlayerData
-    public partial class PlayerData : ScriptableObject {}
+    public partial class PlayerData {}
     //public partial class AIPlayerData : PlayerData {}
 
     //* Interfacing Player Movement
-    public partial class PlayerController : MonoBehaviour { }
+    public partial class PlayerController : MonoBehaviour {}
 
     //* Sense commands
     public class PlayerCommandSensors {

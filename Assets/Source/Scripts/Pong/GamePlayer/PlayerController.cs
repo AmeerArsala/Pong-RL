@@ -34,6 +34,7 @@ namespace Pong.GamePlayer {
 
         // Time-dependent updates (such as physics)
         void FixedUpdate() {
+            // Don't respond to a command if it is just nothing!
             float deltaY = commandSensors.Do_Nothing ? 0f : RespondToCommand(Time.fixedDeltaTime);
 
             //* Track Motion

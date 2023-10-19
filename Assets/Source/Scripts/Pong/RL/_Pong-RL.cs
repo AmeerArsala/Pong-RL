@@ -14,6 +14,8 @@ namespace Pong.RL {
 
         // Action Constants
         public const float ACTION_NULL = 0f;
+        public const float ACTION_MOVE_UP = 1f;
+        public const float ACTION_MOVE_DOWN = 2f;
 
         // Reward Constants
         public const float REWARD_NULL = 0.0f;

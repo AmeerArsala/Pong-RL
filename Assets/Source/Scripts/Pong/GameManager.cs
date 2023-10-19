@@ -68,6 +68,11 @@ namespace Pong {
         // Update is called once per frame
         void Update()
         {
+            if (IsGameOver()) {
+                Exit(); // cleanup and exit application
+                return;
+            }
+
             // Player Updates
             player1.Update();
             player2.Update();
@@ -86,10 +91,6 @@ namespace Pong {
             ball.FixedUpdate();
         }
 
-        public string GetCurrentScore() {
-            return player1.GetScoreboard().GetScore() + "-" + player2.GetScoreboard().GetScore();
-        }
-
         // pick a random Player. Either player1 or player2
         public Player RandomPlayer() {
             bool isPlayer1 = UnityEngine.Random.Range(0, 2) == 0; // random boolean
@@ -99,6 +100,22 @@ namespace Pong {
             } else {
                 return player2;
             }
+        }
+        
+        public string GetCurrentScore() {
+            return player1.GetScoreboard().GetScore() + "-" + player2.GetScoreboard().GetScore();
+        }
+
+        public bool IsGameOver() {
+            return player1.GetScoreboard().GetScore() > GameCache.WIN_SCORE || player2.GetScoreboard().GetScore() > GameCache.WIN_SCORE;
+        }
+
+        void Exit() {
+            player1.OnExit();
+            player2.OnExit();
+            
+            //! Terminate Application
+            Application.Quit();
         }
     }
 }

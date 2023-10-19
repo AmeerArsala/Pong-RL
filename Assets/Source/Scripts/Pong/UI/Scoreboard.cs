@@ -10,14 +10,14 @@ using System;
 
 namespace Pong.UI {
     public partial class Scoreboard {
-        private int score = 0;
+        private uint score = 0;
         private readonly TMP_Text scoreText;
 
         public Scoreboard(TMP_Text scoreText) {
             this.scoreText = scoreText;
         }
 
-        public int GetScore() { return score; }
+        public uint GetScore() { return score; }
 
         public void ScorePoint() {
             // increment score

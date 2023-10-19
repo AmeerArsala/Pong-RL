@@ -26,7 +26,7 @@ namespace Pong.GamePlayer {
         private static uint UID = 0;
 
         // For RL and save/loading
-        private PlayerData playerData;
+        protected PlayerData playerData;
 
         // Tangible GameObjects
         public readonly ControlledGameObject<PlayerController> playerSprite;
@@ -37,7 +37,6 @@ namespace Pong.GamePlayer {
 
         private Player opponent;
 
-        // load from data
         public Player(PlayerData playerData, GameObject sprite, Scoreboard scoreboard) {
             this.playerData = playerData;
             this.scoreboard = scoreboard;
@@ -67,23 +66,6 @@ namespace Pong.GamePlayer {
 
             return playerName;
         }
-
-        public static Player CreateNew(string name, GameObject prefab, Vector2 viewportPos, TMP_Text scoreText, bool recordHistory=false) {
-            // create paddle
-            GameObject paddle = GameObject.Instantiate(prefab, ToLocal(viewportPos), Quaternion.identity);
-
-            // validate name or have a default value
-            string playerName = CreateName(name);
-
-            // initialize data
-            PlayerData playerData = ScriptableObject.CreateInstance<PlayerData>();
-            playerData.Initialize(playerName, recordHistory);
-
-            return new Player(playerData, paddle, new Scoreboard(scoreText));
-        }
-
-        //TODO:
-        //public static Player LoadExisting(string )
 
         public PlayerData GetPlayerData() { return playerData; }
         public Scoreboard GetScoreboard() { return scoreboard; }
@@ -137,6 +119,23 @@ namespace Pong.GamePlayer {
         public void SetLocalPaddleDimensionsFromVP(Vector2 vpDimensions) {
             SetLocalPaddleDimensionsFromVP(vpDimensions.x, vpDimensions.y);
         }
+
+        public virtual void SaveData() {
+            playerData.Save();
+            //? In an inherited class, save the model here too
+        }
+
+        public virtual void LoadData(string filename) {
+            playerData = PlayerData.Load(filename);
+            //? In an inherited class, load the model here too
+        }
+
+        public void OnExit() {
+            if (playerData.TrackHistory) {
+                // write to memory
+                SaveData();
+            }
+        }
     }
 
     //* An actual Human Player with controls and all
@@ -147,7 +146,7 @@ namespace Pong.GamePlayer {
             this.controls = controls;
         }
 
-        public static HumanPlayer CreateNew(string name, GameObject prefab, Vector2 viewportPos, PlayerControls controls, TMP_Text scoreText) {
+        public static HumanPlayer CreateNew(string name, GameObject prefab, Vector2 viewportPos, PlayerControls controls, TMP_Text scoreText, bool recordHistory=false) {
             // create paddle
             GameObject paddle = GameObject.Instantiate(prefab, ToLocal(viewportPos), Quaternion.identity);
 
@@ -155,8 +154,7 @@ namespace Pong.GamePlayer {
             string playerName = CreateName(name);
 
             // initialize data
-            PlayerData playerData = ScriptableObject.CreateInstance<PlayerData>();
-            playerData.Initialize(playerName, trackHistory: false); //TODO: include option?
+            PlayerData playerData = new PlayerData(playerName, recordHistory);
 
             return new HumanPlayer(playerData, paddle, controls, new Scoreboard(scoreText));
         }
@@ -187,8 +185,7 @@ namespace Pong.GamePlayer {
             string playerName = CreateName(name);
 
             // initialize data
-            PlayerData playerData = ScriptableObject.CreateInstance<PlayerData>();
-            playerData.Initialize(playerName, recordHistory);
+            PlayerData playerData = new PlayerData(playerName, recordHistory);
 
             return new CheatingPlayer(playerData, paddle, new Scoreboard(scoreText));
         }
@@ -200,30 +197,10 @@ namespace Pong.GamePlayer {
             Vector2 ballPosition = ballMotion[0];
             Vector2 localPosition = ToViewport(playerSprite.transform.localPosition);
 
+            //* Cheat by tracing the ball's position
             playerSprite.controller.commandSensors.Sense(
                 moveUp: (ballPosition.y > localPosition.y),
                 moveDown: (ballPosition.y < localPosition.y));
         }
     }
-    
-    /**
-    ** Contains a bunch of methods to be implemented by a computer player 
-    ** 
-    */
-    /*public abstract partial class AIPlayer : Player {
-        // load from data?
-        public AIPlayer(PlayerData playerData, GameObject sprite, Scoreboard scoreboard) {
-            this.playerData = playerData;
-            this.scoreboard = scoreboard;
-
-            // collision detection
-            RectangularBodyFrame bodyFrame = sprite.AddComponent<RectangularBodyFrame>();
-
-            // collision forces
-            forceMap = new ForceMap(sprite.transform);
-
-            // wrap it up
-            playerSprite = new ControlledGameObject<PlayerController>(sprite, controller);
-        }
-    }*/
 }

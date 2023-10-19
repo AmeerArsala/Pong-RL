@@ -5,42 +5,75 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+using System;
+using System.IO;
+
 using Pong.RL;
 using Pong.Physics;
 
 namespace Pong.GamePlayer {
+    [System.Serializable]
+    public class PlayerDataBundle { //* Will serialize to JSON
+        private static uint UID = 0;
+        private const char DELIMITER = '_';
+
+        public string player_name;
+        public readonly List<DataUnit> data_history;
+        public string date_time;
+
+        public PlayerDataBundle(string player_name, List<DataUnit> data_history) {
+            this.player_name = player_name;
+            this.data_history = data_history;
+
+            date_time = DateTime.Now.ToString("MM/dd/yyyy H:mm" + DELIMITER + UID++);
+        }
+
+        public string FileName() {
+            // assume player_name allows all legal characters (will design for that later)
+            return player_name + DELIMITER + date_time.Replace('/', DELIMITER).Replace(':', DELIMITER);
+        }
+    }
+
     /*  For Pong RL, we will only care about the statistics of:
         *   Y position of Paddle
         *   Ball's relative distance: vec2[X distance away (absolute value) from goal, Y distance away from Paddle]
         *   Ball's velocity: vec2[X speed towards goal (absolute value), Y]
         ?   Observed Y position of the other Paddle
         ??  Observed Y velocity of the other Paddle
-        ??? Potential add-on: Y-acceleration and further derivatives of Y. Not x tho, that would be very stupid and not even make physical sense
+        ??? Potential add-on: Y-acceleration and further derivatives of Y. Not X tho, that would be very stupid and not even make physical sense
     */
-    public partial class PlayerData : ScriptableObject {
+    public partial class PlayerData {
+        public const string PLAYER_DATA_PATH = "Game/Data/Player/";
         public const string NO_NAME = "";
         private const bool TRACK_HISTORY_DEFAULT = false;
         
-        [SerializeField] private string playerName;
-        [SerializeField] private bool trackHistory = TRACK_HISTORY_DEFAULT;
-        [SerializeField] private readonly List<DataUnit> history = new List<DataUnit>();
+        // serialize only these fields 
+        private string playerName;
+        private bool trackHistory = TRACK_HISTORY_DEFAULT;
+        private readonly List<DataUnit> history = new List<DataUnit>();
 
         private DataUnit current = null;
 
         // Remember, we eventually want a database that will autogenerate stuff like agent/model id: string, etc.
         // ? Maybe use burst compilation for tracking history?
 
-        public void Initialize(string playerName) {
+        public PlayerData(string playerName) {
             this.playerName = playerName;
         }
 
-        public void Initialize(string playerName, bool trackHistory) {
+        public PlayerData(string playerName, bool trackHistory) {
             this.playerName = playerName;
             this.trackHistory = trackHistory;
         }
 
+        public PlayerData(PlayerDataBundle bundle) {
+            playerName = bundle.player_name;
+            history = bundle.data_history;
+            trackHistory = true;
+        }
+
         public string GetPlayerName() {
-            return name;
+            return playerName;
         }
 
         public bool TrackHistory {
@@ -50,6 +83,10 @@ namespace Pong.GamePlayer {
 
         public List<DataUnit> GetHistory() {
             return history;
+        }
+
+        public DataUnit GetMostRecent() {
+            return current;
         }
 
         /**
@@ -104,5 +141,30 @@ namespace Pong.GamePlayer {
 
             current = dataStep;
         }
-    }
+
+        //* Saves a JSON file
+        public void Save() {
+            // Bundle up the data the object has
+            PlayerDataBundle bundle = new PlayerDataBundle(playerName, history);
+
+            // Turn it into JSON
+            string json = JsonUtility.ToJson(bundle);
+
+            // Write it 
+            string filename = bundle.FileName() + ".json";
+            File.WriteAllText(PLAYER_DATA_PATH + filename, json);
+        }
+
+        public static PlayerData Load(string filename) {
+            string filepath = PLAYER_DATA_PATH + filename;
+            if (File.Exists(filepath)) {
+                string json = File.ReadAllText(filepath);
+
+                PlayerDataBundle bundle = JsonUtility.FromJson<PlayerDataBundle>(json);
+                return new PlayerData(bundle);
+            }
+
+            return null;
+        }
+    } 
 }
